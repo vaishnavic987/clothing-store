@@ -20,6 +20,8 @@ const authUser = asyncHandler(async (req, res) => {
             maxAge: 30 * 24 * 60 * 60 * 1000,
         });
         res.json({
+            success: true,
+            message: "Login successful",
             _id: user._id,
             name: user.name,
             email: user.email,
@@ -43,11 +45,27 @@ const registerUser = asyncHandler(async (req, res) => {
     }
     const user = await User.create({ name, email, password });
     if (user) {
-        res.status(201).json({ _id: user._id, name: user.name, email: user.email });
+        res.status(201).json({
+            success: true,
+            message: "User registered successfully",
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+        });
     } else {
         res.status(400);
         throw new Error("Invalid user data");
     }
+});
+
+const logoutUser = asyncHandler(async (req, res) => {
+    res.cookie("jwt", "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+        maxAge: 0,
+    });
+    res.status(200).json({ success: true, message: "Logged out successfully" });
 });
 
 // @desc Get user profile
@@ -92,4 +110,4 @@ const deleteUser = asyncHandler(async (req, res) => {
     res.send("deleteUser");
 });
 
-export { authUser, registerUser, getUserProfile, getUsers, getUserById, updateUser, deleteUser, updateUserProfile };
+export { authUser, registerUser, getUserProfile, getUsers, getUserById, updateUser, deleteUser, updateUserProfile, logoutUser };
