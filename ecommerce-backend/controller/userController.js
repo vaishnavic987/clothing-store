@@ -58,14 +58,17 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 });
 
+// @desc Log out user (clear httpOnly JWT cookie)
+// @route ALL /api/users/logout (GET, POST, etc. — clears jwt cookie)
+// @access Public
 const logoutUser = asyncHandler(async (req, res) => {
-    res.cookie("jwt", "", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-        maxAge: 0,
-    });
-    res.status(200).json({ success: true, message: "Logged out successfully" });
+  const cookieOpts = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+  };
+  res.clearCookie("jwt", cookieOpts);
+  res.status(200).json({ success: true, message: "Logged out successfully" });
 });
 
 // @desc Get user profile

@@ -38,27 +38,30 @@ app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
+// --- API (before production SPA) ---
 app.use("/api/products", productRoutes);
-
 app.get("/api/config/paypal", (req, res) => {
   res.send(process.env.PAYPAL_CLIENT_ID);
 });
+
+app.use("/api/users", userRoutes);
+app.use("/api/orders", orderRoutes);
 
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "..", "frontend", "build")));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "..", "frontend", "build", "index.html"));
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api")) return next();
+    res.sendFile(path.join(__dirname, "..", "frontend", "build", "index.html"), (err) => {
+      if (err) next(err);
+    });
   });
 }
 
-app.use("/api/users", userRoutes);
-app.use("/api/orders", orderRoutes);
 app.use(notFound);
 app.use(errorHandler);
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
-
