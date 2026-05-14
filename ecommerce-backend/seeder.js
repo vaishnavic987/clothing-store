@@ -1,3 +1,5 @@
+import path from "path";
+import { fileURLToPath } from "url";
 import users from "./data/users.js";
 import dotenv from "dotenv";
 import products from "./data/products.js";
@@ -7,7 +9,8 @@ import User from "./models/userModel.js";
 import connectDB from "./config/db.js";
 import colors from "colors";
 
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
 const importData = async () => {
   try {

@@ -1,11 +1,19 @@
 import express from "express";
-import dotenv from "dotenv";
-dotenv.config();
-import { getProducts, getProductById } from "../controller/productController.js";
+import {
+  getProducts,
+  getProductById,
+  deleteProduct,
+  createProduct,
+  createProductReview,
+  getTopProducts,
+} from "../controller/productController.js";
+import { protect, admin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.route("/").get(getProducts);
-router.route("/:id").get(getProductById);
+router.route("/").get(getProducts).post(protect, admin, createProduct);
+router.get("/top", getTopProducts);
+router.route("/:id/reviews").post(protect, createProductReview);
+router.route("/:id").get(getProductById).delete(protect, admin, deleteProduct);
 
 export default router;

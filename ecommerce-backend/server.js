@@ -1,12 +1,16 @@
 import express from "express";
-import products from "./data/products.js";
+import path from "path";
+import { fileURLToPath } from "url";
 import dotenv from "dotenv";
-dotenv.config();
 import connectDB from "./config/db.js";
 import productRoutes from "./routes/productRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import userRoutes from "./routes/userRoutes.js";
 import cookieParser from "cookie-parser";
+import orderRoutes from "./routes/orderRoutes.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, "..", ".env") });
 connectDB();
 
 const port = process.env.PORT || 3000;
@@ -16,25 +20,27 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
-});
-
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-app.get("/api/products", (req, res) => {
-  res.json(products);
+app.use("/api/products", productRoutes);
+
+app.get("/api/config/paypal", (req, res) => {
+  res.send(process.env.PAYPAL_CLIENT_ID);
 });
 
-app.get("/api/products/:id", (req, res) => {
-  const product = products.find((p) => p.id === parseInt(req.params.id));
-  res.json(product);
-});
-app.use("/api/products", productRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "..", "frontend", "build")));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "frontend", "build", "index.html"));
+  });
+}
+
 app.use("/api/users", userRoutes);
+app.use("/api/orders", orderRoutes);
 app.use(notFound);
 app.use(errorHandler);
 app.listen(port, () => {
