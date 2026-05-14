@@ -1,0 +1,122 @@
+export default [
+    {
+      "id": 1,
+      "name": "Oversized Graphic T-Shirt",
+      "brand": "Urban Threads",
+      "category": "mens",
+      "price": 899,
+      "size": ["S", "M", "L", "XL"],
+      "color": "Black",
+      "rating": 4.5,
+      "stock": 20,
+      "image": "tshirt1.jpg"
+    },
+    {
+      "id": 2,
+      "name": "Printed Hoodie",
+      "brand": "Street Culture",
+      "category": "mens",
+      "price": 1499,
+      "size": ["M", "L", "XL"],
+      "color": "Grey",
+      "rating": 4.3,
+      "stock": 15,
+      "image": "hoodie1.jpg"
+    },
+    {
+      "id": 3,
+      "name": "Casual Denim Jacket",
+      "brand": "Denim Co",
+      "category": "womens",
+      "price": 1999,
+      "size": ["S", "M", "L"],
+      "color": "Blue",
+      "rating": 4.6,
+      "stock": 10,
+      "image": "jacket1.jpg"
+    },
+    {
+      "id": 4,
+      "name": "Regular Fit Jeans",
+      "brand": "BlueWave",
+      "category": "mens",
+      "price": 1299,
+      "size": ["30", "32", "34", "36"],
+      "color": "Dark Blue",
+      "rating": 4.1,
+      "stock": 25,
+      "image": "jeans1.jpg"
+    },
+    {
+      "id": 5,
+      "name": "Crop Top",
+      "brand": "StyleNest",
+      "category": "womens",
+      "price": 699,
+      "size": ["S", "M", "L"],
+      "color": "White",
+      "rating": 4.4,
+      "stock": 18,
+      "image": "croptop1.jpg"
+    },
+    {
+      "id": 6,
+      "name": "Jogger Pants",
+      "brand": "MoveFit",
+      "category": "mens",
+      "price": 1199,
+      "size": ["M", "L", "XL"],
+      "color": "Olive Green",
+      "rating": 4.2,
+      "stock": 30,
+      "image": "jogger1.jpg"
+    },
+    {
+      "id": 7,
+      "name": "Floral Summer Dress",
+      "brand": "Bloom Fashion",
+      "category": "womens",
+      "price": 1599,
+      "size": ["S", "M"],
+      "color": "Pink",
+      "rating": 4.7,
+      "stock": 12,
+      "image": "dress1.jpg"
+    },
+    {
+      "id": 8,
+      "name": "Basic Round Neck T-Shirt",
+      "brand": "DailyWear",
+      "category": "kids",
+      "price": 499,
+      "size": ["2-3Y", "4-5Y", "6-7Y", "8-9Y"],
+      "color": "Navy Blue",
+      "rating": 4.0,
+      "stock": 40,
+      "image": "basictee1.jpg"
+    },
+    {
+      "id": 9,
+      "name": "Kids Denim Shorts",
+      "brand": "LittleDenim",
+      "category": "kids",
+      "price": 799,
+      "size": ["4-5Y", "6-7Y", "8-9Y", "10-11Y"],
+      "color": "Light Blue",
+      "rating": 4.5,
+      "stock": 22,
+      "image": "kidshorts1.jpg"
+    },
+    {
+      "id": 10,
+      "name": "Girls Party Frock",
+      "brand": "TinyBloom",
+      "category": "kids",
+      "price": 1299,
+      "size": ["3-4Y", "5-6Y", "7-8Y"],
+      "color": "Rose",
+      "rating": 4.8,
+      "stock": 14,
+      "image": "frock1.jpg"
+    }
+  ]

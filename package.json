@@ -1,0 +1,27 @@
+{
+  "name": "clothing-store",
+  "version": "1.0.0",
+  "main": "ecommerce-backend/server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon ecommerce-backend/server.js",
+    "data:import": "node ecommerce-backend/seeder.js",
+    "data:destroy": "node ecommerce-backend/seeder.js -d",
+    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "colors": "^1.4.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.23.1",
+    "nodemon": "^3.1.14"
+  }
+}
