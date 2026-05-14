@@ -15,8 +15,8 @@ const authUser = asyncHandler(async (req, res) => {
         const token = generateToken(user._id);
         res.cookie("jwt", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV !== "development",
-            sameSite: "strict",
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
             maxAge: 30 * 24 * 60 * 60 * 1000,
         });
         res.json({
