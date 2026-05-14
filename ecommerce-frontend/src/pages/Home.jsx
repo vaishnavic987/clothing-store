@@ -1,13 +1,13 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import { ChevronDown } from 'lucide-react'
-import { products } from '../data/products'
 import '../styles/Home.scss'
-import api from '../api'
+import api from '../services/axios'
 
 const Home = () => {
   const [sortBy, setSortBy] = useState('relevant')
+  const [allProducts, setAllProducts] = useState([])
   const navigate = useNavigate()
   const { category: paramCategory } = useParams()
   const location = useLocation()
@@ -20,21 +20,30 @@ const Home = () => {
     return null
   }, [paramCategory, location.pathname])
 
-  // Filter products by category
-  const filteredProducts = useMemo(async () => {
-
-    try {
-      const response = await api.get('/products')
-      const data = response.data
-    } catch (error) {
-      console.error('Failed to fetch products:', error)
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get('/products')
+        const apiProducts = response.data.products || response.data
+        setAllProducts(apiProducts)
+      } catch (error) {
+        console.error('Failed to fetch products:', error)
+      }
     }
 
+    fetchProducts()
+  }, [])
+
+  const filteredProducts = useMemo(() => {
     if (!category) {
-      return data ?? products
+      return allProducts
     }
-    return data ?? products.filter(product => product.mainCategory === category.toLowerCase())
-  }, [category])
+    return allProducts.filter(product => {
+      const productCategory = product.category || product.mainCategory
+      return productCategory === category.toLowerCase() || productCategory === `${category.toLowerCase()}s`
+    })
+  }, [category, allProducts])
 
   const displayCount = filteredProducts.length
 
@@ -60,35 +69,42 @@ const Home = () => {
 
         {/* Product Grid */}
         <div className="product-grid">
-          {filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              className="product-card"
-              onClick={() => navigate(`/product/${product.id}`)}
-            >
-              {/* Product Image */}
-              <div className="product-image-wrapper">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="product-image"
-                />
-              </div>
+          {filteredProducts.map((product) => {
+            const productId = product._id || product.id
+            const displayPrice = product.price >= 100 ? (product.price / 100).toFixed(2) : product.price
+            
+            return (
+              <div
+                key={productId}
+                className="product-card"
+                onClick={() => navigate(`/product/${productId}`)}
+              >
+                {/* Product Image */}
+                <div className="product-image-wrapper">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="product-image"
+                  />
+                </div>
 
-              {/* Product Info */}
-              <div className="product-info">
-                <h3 className="product-name">
-                  {product.name}
-                </h3>
+                {/* Product Info */}
+                <div className="product-info">
+                  <h3 className="product-name">
+                    {product.name}
+                  </h3>
 
-                {/* Prices */}
-                <div className="product-prices">
-                  <span className="current-price">${product.price}</span>
-                  <span className="original-price">${product.originalPrice}</span>
+                  {/* Prices */}
+                  <div className="product-prices">
+                    <span className="current-price">${displayPrice}</span>
+                    {product.originalPrice && (
+                      <span className="original-price">${product.originalPrice}</span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </main>
     </div>
