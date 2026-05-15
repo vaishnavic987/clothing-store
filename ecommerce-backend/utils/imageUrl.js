@@ -1,18 +1,33 @@
-/** Bare filename → `/images/...`; then prepend API base for <img src> */
+/** API origin for absolute image URLs in JSON (used by <img src> from another origin). */
+export function apiBase(req) {
+  const fromEnv = process.env.API_PUBLIC_URL?.trim();
+  if (fromEnv) return fromEnv.replace(/\/$/, "");
+  const host = req?.get?.("host");
+  if (host) return `${req.protocol || "http"}://${host}`.replace(/\/$/, "");
+  const port = process.env.PORT || 3000;
+  return `http://localhost:${port}`;
+}
+
+/** Bare filename or `/images/...` → full URL */
 export function imageUrl(req, image) {
-  if (!image || typeof image !== "string") return image;
+  if (image == null || image === "") return image;
+  if (typeof image !== "string") return image;
+
   let path = image.trim();
   if (/^https?:\/\//i.test(path)) return path;
+
   if (path.startsWith("/image/")) path = `/images/${path.slice(7)}`;
-  if (path.startsWith("uploads/")) path = `/${path}`;
+  else if (path.startsWith("uploads/")) path = `/${path}`;
   else if (!path.startsWith("/")) path = `/images/${encodeURIComponent(path)}`;
-  const base = (process.env.API_PUBLIC_URL || `${req.protocol}://${req.get("host")}`).replace(/\/$/, "");
-  return `${base}${path}`;
+
+  return `${apiBase(req)}${path}`;
 }
 
 export function productJSON(req, doc) {
   const o = doc?.toObject ? doc.toObject({ flattenMaps: true }) : { ...doc };
-  if (o.image) o.image = imageUrl(req, o.image);
+  if (o.image != null && o.image !== "") {
+    o.image = imageUrl(req, o.image);
+  }
   return o;
 }
 
@@ -21,7 +36,7 @@ export function orderJSON(req, doc) {
   if (Array.isArray(o.orderItems)) {
     o.orderItems = o.orderItems.map((it) => ({
       ...it,
-      image: it.image ? imageUrl(req, it.image) : it.image,
+      image: it.image != null && it.image !== "" ? imageUrl(req, it.image) : it.image,
     }));
   }
   return o;

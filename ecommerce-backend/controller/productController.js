@@ -1,5 +1,6 @@
 import Product from "../models/productModels.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { productJSON } from "../utils/imageUrl.js";
 
 const getProducts = asyncHandler(async (req, res) => {
     const pageSize = 10;
@@ -17,7 +18,7 @@ const getProducts = asyncHandler(async (req, res) => {
         .limit(pageSize)
         .skip(pageSize * (page - 1));
     res.json({
-        products,
+        products: products.map((p) => productJSON(req, p)),
         page,
         pages: Math.ceil(count / pageSize),
     });
@@ -26,7 +27,7 @@ const getProducts = asyncHandler(async (req, res) => {
 const getProductById = asyncHandler(async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (product) {
-        res.json(product);
+        res.json(productJSON(req, product));
     } else {
         res.status(404).json({ message: "Product not found" });
     }
@@ -48,7 +49,7 @@ const createProduct = asyncHandler(async (req, res) => {
         price: req.body.price,
     })
     const createdProduct = await product.save();
-    res.status(201).json(createdProduct);
+    res.status(201).json(productJSON(req, createdProduct));
 })
 
 
@@ -73,7 +74,7 @@ const createProductReview = asyncHandler(async (req, res) => {
 
 const getTopProducts = asyncHandler(async (req, res) => {
     const products = await Product.find({}).sort({ rating: -1 }).limit(3);
-    res.json(products);
+    res.json(products.map((p) => productJSON(req, p)));
 })
 
 export { getProducts, getProductById, deleteProduct, createProduct, createProductReview, getTopProducts };
