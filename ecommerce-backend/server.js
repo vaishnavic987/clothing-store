@@ -12,9 +12,13 @@ import orderRoutes from "./routes/orderRoutes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
-connectDB();
 
 const port = process.env.PORT || 3000;
+if (!process.env.API_PUBLIC_URL?.trim()) {
+  process.env.API_PUBLIC_URL = `http://localhost:${port}`;
+}
+
+connectDB();
 const app = express();
 
 const clientOrigins = process.env.CLIENT_URL?.split(",")

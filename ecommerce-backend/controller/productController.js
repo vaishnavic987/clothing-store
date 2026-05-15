@@ -3,7 +3,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import { productJSON } from "../utils/imageUrl.js";
 
 const getProducts = asyncHandler(async (req, res) => {
-    const pageSize = 10;
+    const pageSize = 100;
     const page = Number(req.query.pageNumber) || 1;
     const search = req.query.search
         ? { name: { $regex: req.query.search, $options: "i" } }
