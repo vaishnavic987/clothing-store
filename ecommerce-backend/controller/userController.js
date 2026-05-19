@@ -73,46 +73,6 @@ const logoutUser = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, message: "Logged out successfully" });
 });
 
-// @desc Get user profile
-// @route GET /api/users/profile
-// @access Private
-const getUserProfile = asyncHandler(async (req, res) => {
-    res.send("getUserProfile");
-});
 
-// @desc Update user profile
-// @route PUT /api/users/profile
-// @access Private
-const updateUserProfile = asyncHandler(async (req, res) => {
-    res.send("updateUserProfile");
-});
 
-// @desc Get users
-// @route GET /api/users
-// @access Private
-const getUsers = asyncHandler(async (req, res) => {
-    res.send("getUsers");
-});
-
-// @desc Get user by ID
-// @route GET /api/users/:id
-// @access Private
-const getUserById = asyncHandler(async (req, res) => {
-    res.send("getUserById");
-});
-
-// @desc Update user
-// @route PUT /api/users/:id
-// @access Private
-const updateUser = asyncHandler(async (req, res) => {
-    res.send("updateUser");
-});
-
-// @desc Delete user
-// @route DELETE /api/users/:id
-// @access Private
-const deleteUser = asyncHandler(async (req, res) => {
-    res.send("deleteUser");
-});
-
-export { authUser, registerUser, getUserProfile, getUsers, getUserById, updateUser, deleteUser, updateUserProfile, logoutUser };
+export { authUser, registerUser, logoutUser };
