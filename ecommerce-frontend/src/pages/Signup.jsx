@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../store/authSlice';
 import { Link, useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import '../styles/Signup.scss';
+import api from '../services/axios';
 
 const Signup = () => {
   const [name, setName] = useState('');
@@ -26,7 +29,7 @@ const Signup = () => {
     }
 
     try {
-      const response = await api.post('/auth/register', {
+      const response = await api.post('/users', {
         name,
         email,
         password
@@ -34,17 +37,20 @@ const Signup = () => {
 
       const data = response.data;
 
-      // Auto-login after successful signup
+      const userData = { id: data.id, name: data.name || name, email: data.email };
+      
       dispatch(loginSuccess({ 
-        user: { id: data.id, name: data.name || name, email: data.email }, 
+        user: userData, 
         token: data.token 
       }));
 
       localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(userData));
 
       navigate('/');
       
     } catch (err) {
+      console.log('Signup error:', err)
       const message = err.response?.data?.message || 'Registration failed. Please try again.';
       setError(message);
     } finally {
@@ -53,10 +59,12 @@ const Signup = () => {
   };
 
   return (
-    <div className="signup-container">
-      <div className="signup-card">
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <Navbar />
+      <div className="signup-container" style={{ flex: 1 }}>
+        <div className="signup-card">
         <h2 className="signup-title">
-          Create Your Account
+          Sign Up
         </h2>
         
         {error && (
@@ -77,7 +85,7 @@ const Signup = () => {
               onChange={(e) => setName(e.target.value)}
               required
               className="form-input"
-              placeholder="John Doe"
+              placeholder="Your name"
               disabled={loading}
             />
           </div>
@@ -93,7 +101,7 @@ const Signup = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="form-input"
-              placeholder="you@example.com"
+              placeholder="Email address"
               disabled={loading}
             />
           </div>
@@ -110,7 +118,7 @@ const Signup = () => {
               required
               minLength="6"
               className="form-input"
-              placeholder="••••••••"
+              placeholder="Password"
               disabled={loading}
             />
           </div>
@@ -127,7 +135,7 @@ const Signup = () => {
               required
               minLength="6"
               className="form-input"
-              placeholder="••••••••"
+              placeholder="Confirm Password"
               disabled={loading}
             />
           </div>
@@ -137,18 +145,20 @@ const Signup = () => {
             className="submit-button"
             disabled={loading}
           >
-            {loading ? 'Creating Account...' : 'Sign Up'}
+            {loading ? 'Please wait...' : 'Continue'}
           </button>
         </form>
         
         <p className="login-link">
           Already have an account?{' '}
           <Link to="/login">
-            Login
+            Login here
           </Link>
         </p>
       </div>
     </div>
+    <Footer />
+  </div>
   );
 };
 

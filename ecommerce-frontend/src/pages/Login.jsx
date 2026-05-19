@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../store/authSlice';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import '../styles/Login.scss';
+import api from '../services/axios';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -12,29 +15,39 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const location = useLocation();
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
    try {
-      const response = await api.post('/auth/login', {
+      const response = await api.post('/users/login', {
         email,
         password
       });
 
       const data = response.data;
 
+      const userData = { id: data._id, name: data.name, email: data.email };
+      
       dispatch(loginSuccess({ 
-        user: { id: data.id, name: `${data.firstName} ${data.lastName}`, email: data.email }, 
+        user: userData, 
         token: data.token 
       }));
 
       localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      const redirectToProduct = location.state?.redirectToProduct;
 
-      navigate('/');
-      
+      if (redirectToProduct) {
+        navigate('/', { state: { openProduct: redirectToProduct } });
+      } else {
+        navigate('/');
+      }      
     } catch (err) {
+      console.log('Login error:', err)
       const message = err.response?.data?.message || 'Connection to server failed';
       setError(message);
     } finally {
@@ -43,10 +56,12 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <Navbar />
+      <div className="login-container" style={{ flex: 1 }}>
+        <div className="login-card">
         <h2 className="login-title">
-          Login to Your Account
+          Login
         </h2>
         
         {error && (
@@ -67,7 +82,7 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="form-input"
-              placeholder="you@example.com"
+              placeholder="Email address"
               disabled={loading}
             />
           </div>
@@ -83,7 +98,7 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               className="form-input"
-              placeholder="••••••••"
+              placeholder="Password"
               disabled={loading}
             />
           </div>
@@ -100,10 +115,12 @@ const Login = () => {
         <p className="signup-link">
           Don't have an account?{' '}
           <Link to="/signup">
-            Sign up
+            Sign up here
           </Link>
         </p>
+        </div>
       </div>
+      <Footer />
     </div>
   );
 };

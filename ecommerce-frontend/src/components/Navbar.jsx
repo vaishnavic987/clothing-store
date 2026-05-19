@@ -1,16 +1,46 @@
-import { Link, NavLink } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import { ShoppingCart } from 'lucide-react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { useSelector, useDispatch } from 'react-redux'
+import { ShoppingCart, Search } from 'lucide-react'
+import { useState } from 'react';
+import { logout } from '../store/authSlice'
+import { clearCart } from '../store/cartSlice'
 import '../styles/Navbar.scss'
 
 const Navbar = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth)
+  const { totalQuantity } = useSelector((state) => state.cart)
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`)
+    } else {
+      navigate('/')
+    }
+  }
+
+  const handleLogout = () => {
+    setIsLoggingOut(true)
+    
+    setTimeout(() => {
+      dispatch(logout())
+      dispatch(clearCart())
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      navigate('/')
+      setIsLoggingOut(false)
+    }, 1000)
+  }
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
         <div className="navbar-content">
-          {/* Logo */}
           <Link to="/" className="navbar-logo">
             <div className="logo-icon">
               <ShoppingCart />
@@ -18,7 +48,6 @@ const Navbar = () => {
             <span className="logo-text">SHOPPER</span>
           </Link>
 
-          {/* Navigation Links */}
           <div className="navbar-links">
             <NavLink 
               to="/" 
@@ -28,13 +57,13 @@ const Navbar = () => {
               Shop
             </NavLink>
             <NavLink 
-              to="/men"
+              to="/mens"
               className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
             >
               Men
             </NavLink>
             <NavLink 
-              to="/women"
+              to="/womens"
               className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
             >
               Women
@@ -47,14 +76,38 @@ const Navbar = () => {
             </NavLink>
           </div>
 
-          {/* Right Side - Login/User and Cart */}
+
+          <form onSubmit={handleSearchSubmit} className="navbar-search">
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+            <button type="submit" className="search-button" aria-label="Search">
+              <Search size={18} />
+            </button>
+          </form>
+
           <div className="navbar-actions">
             {isAuthenticated ? (
               <div className="user-section">
                 <span className="user-greeting">Hi, {user?.name}</span>
-                <Link to="/logout" className="logout-link">
-                  Logout
-                </Link>
+                <button 
+                  onClick={handleLogout} 
+                  className="logout-link"
+                  disabled={isLoggingOut}
+                >
+                  {isLoggingOut ? (
+                    <span className="logout-loader">
+                      <span className="spinner"></span>
+                      Logging out...
+                    </span>
+                  ) : (
+                    'Logout'
+                  )}
+                </button>
               </div>
             ) : (
               <Link to="/login" className="login-link">
@@ -64,12 +117,13 @@ const Navbar = () => {
               </Link>
             )}
             
-            {/* Cart Icon with Badge */}
             <Link to="/cart" className="cart-link">
               <ShoppingCart className="cart-icon" />
-              <span className="cart-badge">
-                0
-              </span>
+              {totalQuantity > 0 && (
+                <span className="cart-badge">
+                  {totalQuantity}
+                </span>
+              )}
             </Link>
           </div>
         </div>

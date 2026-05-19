@@ -1,33 +1,59 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 import Navbar from '../components/Navbar'
-import { Star, ChevronRight } from 'lucide-react'
-import { products } from '../data/products'
+import Footer from '../components/Footer'
+import { Star, ChevronRight, ArrowLeft } from 'lucide-react'
+import { addToCart } from '../store/cartSlice'
+import api from '../services/axios'
 import '../styles/ProductDetails.scss'
 
-const ProductDetails = () => {
-  const { id } = useParams()
+const ProductDetails = ({ product, onBack }) => {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const { isAuthenticated } = useSelector(state => state.auth)
   const [selectedSize, setSelectedSize] = useState('')
   const [selectedImage, setSelectedImage] = useState(0)
-  const [product, setProduct] = useState(null)
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [sizeError, setSizeError] = useState('')
 
   useEffect(() => {
-    const foundProduct = products.find(p => p.id === parseInt(id))
-    if (foundProduct) {
-      setProduct(foundProduct)
-      setSelectedImage(0)
-    } else {
-      navigate('/')
-    }
-  }, [id, navigate])
+    // Reset selections when product changes
+    setSelectedImage(0)
+    setSelectedSize('')
+  }, [product])
 
-  const handleAddToCart = () => {
-    if (!selectedSize) {
-      alert('Please select a size')
+  const handleAddToCart = async() => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true)
       return
     }
-    console.log('Adding to cart:', { product, size: selectedSize })
+
+    if (!selectedSize) {
+      setSizeError('Please select a size')
+      return
+    }
+    
+    setSizeError('')
+    const productId = product._id || product.id
+    const displayPrice = product.price >= 100 ? parseFloat((product.price / 100).toFixed(2)) : product.price
+    
+    dispatch(addToCart({
+      id: productId,
+      name: product.name,
+      price: displayPrice,
+      image: product.image,
+      selectedSize: selectedSize,
+      quantity: 1
+    }))
+
+    await api.post('/orders', {
+      product: productId,
+      name: product.name,
+      price: displayPrice,
+      image: product.image,
+      qty: 1
+    })
   }
 
   const renderStars = (rating) => {
@@ -45,18 +71,43 @@ const ProductDetails = () => {
     return <div>Loading...</div>
   }
 
+  const availableSizes = product.size || product.sizes || []
+  const productImages = product.images || [product.image]
+  const displayPrice = product.price >= 100 ? (product.price / 100).toFixed(2) : product.price
+  const productCategory = product.category || 'Product'
+
   return (
     <div className="product-details-page">
       <Navbar />
       
+      {showLoginModal && (
+        <div className="modal-overlay" onClick={() => setShowLoginModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowLoginModal(false)}>
+              ×
+            </button>
+            <h2>Login Required</h2>
+            <p>Please login to add items to your cart</p>
+            <div className="modal-actions">
+              <button className="modal-btn cancel" onClick={() => setShowLoginModal(false)}>
+                Cancel
+              </button>
+              <button className="modal-btn login" onClick={() => navigate('/login', { state: { redirectToProduct: product } })}>
+                Go to Login
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <main className="product-details-main">
-        {/* Breadcrumb */}
+        <button className="back-button" onClick={onBack}>
+          <ArrowLeft size={20} />
+          <span>Back to Products</span>
+        </button>
+
         <div className="breadcrumb">
-          <span className="breadcrumb-item" onClick={() => navigate('/')}>HOME</span>
-          <ChevronRight size={16} className="breadcrumb-separator" />
-          <span className="breadcrumb-item" onClick={() => navigate('/')}>SHOP</span>
-          <ChevronRight size={16} className="breadcrumb-separator" />
-          <span className="breadcrumb-item">Men</span>
+          <span className="breadcrumb-item" onClick={onBack}>HOME</span>
           <ChevronRight size={16} className="breadcrumb-separator" />
           <span className="breadcrumb-item active">{product.name}</span>
         </div>
@@ -65,21 +116,23 @@ const ProductDetails = () => {
           {/* Left Side - Images */}
           <div className="product-images">
             {/* Thumbnail Gallery */}
-            <div className="thumbnail-gallery">
-              {product.images.map((image, index) => (
-                <div
-                  key={index}
-                  className={`thumbnail ${selectedImage === index ? 'active' : ''}`}
-                  onClick={() => setSelectedImage(index)}
-                >
-                  <img src={image} alt={`${product.name} ${index + 1}`} />
-                </div>
-              ))}
-            </div>
+            {productImages.length > 1 && (
+              <div className="thumbnail-gallery">
+                {productImages.map((image, index) => (
+                  <div
+                    key={index}
+                    className={`thumbnail ${selectedImage === index ? 'active' : ''}`}
+                    onClick={() => setSelectedImage(index)}
+                  >
+                    <img src={image} alt={`${product.name} ${index + 1}`} />
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Main Image */}
             <div className="main-image">
-              <img src={product.images[selectedImage]} alt={product.name} />
+              <img src={productImages[selectedImage]} alt={product.name} />
             </div>
           </div>
 
@@ -90,35 +143,54 @@ const ProductDetails = () => {
             {/* Rating */}
             <div className="product-rating">
               <div className="stars">
-                {renderStars(product.rating)}
+                {renderStars(product.rating || 0)}
               </div>
-              <span className="review-count">({product.reviewCount})</span>
+              {product.numReviews !== undefined && (
+                <span className="review-count">({product.numReviews})</span>
+              )}
+              {product.reviewCount !== undefined && (
+                <span className="review-count">({product.reviewCount})</span>
+              )}
             </div>
 
             {/* Price */}
             <div className="product-pricing">
-              <span className="original-price">${product.originalPrice}</span>
-              <span className="current-price">${product.price}</span>
+              {product.originalPrice && (
+                <span className="original-price">${product.originalPrice}</span>
+              )}
+              <span className="current-price">${displayPrice}</span>
             </div>
 
             {/* Description */}
             <p className="product-description">{product.description}</p>
 
             {/* Size Selector */}
-            <div className="size-selector">
-              <h3 className="size-label">Select Size</h3>
-              <div className="size-options">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    className={`size-button ${selectedSize === size ? 'active' : ''}`}
-                    onClick={() => setSelectedSize(size)}
-                  >
-                    {size}
-                  </button>
-                ))}
+            {availableSizes.length > 0 && (
+              <div className="size-selector">
+                <h3 className="size-label">Select Size</h3>
+                <div className="size-options">
+                  {availableSizes.map((size) => (
+                    <button
+                      key={size}
+                      className={`size-button ${selectedSize === size ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedSize(size)
+                        setSizeError('')
+                      }}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Size Error Message */}
+            {sizeError && (
+              <div className="size-error-message">
+                {sizeError}
+              </div>
+            )}
 
             {/* Add to Cart Button */}
             <button className="add-to-cart-button" onClick={handleAddToCart}>
@@ -126,19 +198,32 @@ const ProductDetails = () => {
             </button>
 
             {/* Category */}
-            <div className="product-category">
-              <span className="label">Category :</span>
-              <span className="value">{product.category.join(', ')}</span>
-            </div>
+            {product.category && (
+              <div className="product-category">
+                <span className="label">Category :</span>
+                <span className="value">{Array.isArray(product.category) ? product.category.join(', ') : product.category}</span>
+              </div>
+            )}
+
+            {/* Brand */}
+            {product.brand && (
+              <div className="product-brand">
+                <span className="label">Brand :</span>
+                <span className="value">{product.brand}</span>
+              </div>
+            )}
 
             {/* Tags */}
-            <div className="product-tags">
-              <span className="label">Tags :</span>
-              <span className="value">{product.tags.join(', ')}</span>
-            </div>
+            {product.tags && product.tags.length > 0 && (
+              <div className="product-tags">
+                <span className="label">Tags :</span>
+                <span className="value">{product.tags.join(', ')}</span>
+              </div>
+            )}
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   )
 }
