@@ -2,6 +2,7 @@ import express from "express";
 import {
     getCart,
     addToCart,
+    updateCartItemQty,
     removeFromCart,
     clearCart,
     checkoutCart,
@@ -14,6 +15,7 @@ router.use(protect);
 
 router.route("/").get(getCart).post(addToCart).delete(clearCart);
 router.post("/checkout", checkoutCart);
+router.patch("/:productId", updateCartItemQty);
 router.delete("/:productId", removeFromCart);
 
 export default router;

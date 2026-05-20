@@ -104,6 +104,41 @@ export const addToCart = asyncHandler(async (req, res) => {
     res.status(200).json({ ...cartJSON(req, cart), ...prices });
 });
 
+/** PATCH /api/cart/:productId?size=M — set qty (replaces, does not add) */
+export const updateCartItemQty = asyncHandler(async (req, res) => {
+    const { productId } = req.params;
+    const { size } = req.query;
+    const qty = Number(req.body.qty);
+
+    if (!size) {
+        res.status(400);
+        throw new Error("size query param is required");
+    }
+    if (!Number.isInteger(qty) || qty < 1) {
+        res.status(400);
+        throw new Error("qty must be an integer of at least 1");
+    }
+
+    const cart = await Cart.findOne({ user: req.user._id });
+    if (!cart) {
+        res.status(404);
+        throw new Error("Cart not found");
+    }
+
+    const item = cart.cartItems.find(
+        (i) => i.product.toString() === productId && i.size === size
+    );
+    if (!item) {
+        res.status(404);
+        throw new Error("Item not found in cart");
+    }
+
+    item.qty = qty;
+    await cart.save();
+    const prices = calcPrices(cart.cartItems);
+    res.status(200).json({ ...cartJSON(req, cart), ...prices });
+});
+
 /** DELETE /api/cart/:productId?size=M */
 export const removeFromCart = asyncHandler(async (req, res) => {
     const { productId } = req.params;
