@@ -19,8 +19,26 @@ const Signup = () => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+
+    if (name.trim().length < 2) {
+      setError('Name must be at least 2 characters long.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/; 
+    if (!passwordRegex.test(password)) {
+      setError('Password must be at least 6 characters and contain both letters and numbers.');
+      return;
+    }
+
+    setLoading(true);
     
     if (password !== confirmPassword) {
       setError('Passwords do not match!');

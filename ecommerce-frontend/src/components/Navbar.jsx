@@ -1,9 +1,10 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { ShoppingCart, Search } from 'lucide-react'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { logout } from '../store/authSlice'
-import { clearCart } from '../store/cartSlice'
+import { clearCart, setCart } from '../store/cartSlice'
+import api from '../services/axios'
 import '../styles/Navbar.scss'
 
 const Navbar = () => {
@@ -14,6 +15,31 @@ const Navbar = () => {
 
   const [searchQuery, setSearchQuery] = useState('')
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      if (isAuthenticated) {
+        try {
+          const response = await api.get('/cart')
+          const cartItems = response.data.cartItems || []
+          const totalAmount = response.data.itemsPrice || 0
+          const totalQuantity = cartItems.reduce((acc, item) => acc + item.qty, 0)
+
+          const dbCartData = {
+            items: cartItems,
+            totalAmount: totalAmount,
+            totalQuantity: totalQuantity
+          }
+
+          dispatch(setCart(dbCartData))
+        } catch (error) {
+          console.error('Failed to fetch cart:', error)
+        }
+      }
+    }
+
+    fetchCart()
+  }, [isAuthenticated, dispatch])
 
   const handleSearchSubmit = (e) => {
     e.preventDefault()
