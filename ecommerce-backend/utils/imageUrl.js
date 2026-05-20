@@ -31,6 +31,17 @@ export function productJSON(req, doc) {
   return o;
 }
 
+export function cartJSON(req, doc) {
+  const o = doc?.toObject ? doc.toObject({ flattenMaps: true }) : { ...doc };
+  if (Array.isArray(o.cartItems)) {
+    o.cartItems = o.cartItems.map((it) => ({
+      ...it,
+      image: it.image != null && it.image !== "" ? imageUrl(req, it.image) : it.image,
+    }));
+  }
+  return o;
+}
+
 export function orderJSON(req, doc) {
   const o = doc?.toObject ? doc.toObject({ flattenMaps: true }) : { ...doc };
   if (Array.isArray(o.orderItems)) {

@@ -51,24 +51,3 @@ export const getMyOrders = asyncHandler(async (req, res) => {
     res.status(200).json(orders.map((o) => orderJSON(req, o)));
 });
 
-export const addOrderItems = asyncHandler(async (req, res) => {
-    const orderItems = req.body.orderItems || req.body.items;
-
-    if (!orderItems?.length) {
-        res.status(400);
-        throw new Error("No order items");
-    }
-
-    const itemsPrice = orderItems.reduce((sum, item) => sum + item.price * item.qty, 0);
-
-    const order = await Order.create({
-        user: req.user._id,
-        orderItems,
-        itemsPrice,
-        shippingPrice: 0,
-        totalPrice: itemsPrice,
-    });
-
-    res.status(201).json(orderJSON(req, order));
-});
-
