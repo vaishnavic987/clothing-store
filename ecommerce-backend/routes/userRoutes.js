@@ -2,7 +2,6 @@ import express from "express";
 import { authUser, registerUser, logoutUser } from "../controller/userController.js";
 import { protect } from "../middleware/authMiddleware.js";
 const router = express.Router();
-/** Parses Postman "form-data" (multipart/form-data); JSON still uses express.json() */
 
 router.route("/").post(registerUser);
 router.route("/login").post(authUser);

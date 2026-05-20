@@ -17,8 +17,10 @@ const orderSchema = new mongoose.Schema({
                 ref: "Product",
                 required: true,
             },
+            size: { type: String, required: true },
         },
     ],
+    isCart: { type: Boolean, default: false },
     shippingAddress: {
         address: { type: String },
         city: { type: String },
