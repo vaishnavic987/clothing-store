@@ -157,8 +157,8 @@ export const createCheckoutSession = asyncHandler(async (req, res) => {
             userId: req.user._id.toString(),
             shipping: JSON.stringify(shippingDetails),
         },
-        success_url: `${base}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${base}/payment-cancel`,
+        success_url: `${base}/order-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${base}/checkout`,
     });
 
     res.status(200).json({ url: session.url, sessionId: session.id });
