@@ -217,6 +217,19 @@ export const checkoutCart = asyncHandler(async (req, res) => {
             product: item.product,
             size: item.size,
         })),
+        firstName: "Guest",
+        lastName: "Checkout",
+        email: req.user.email,
+        phoneNumber: "N/A",
+        shippingMethod: "standard",
+        shippingAddress: {
+            address: "N/A",
+            city: "N/A",
+            state: "N/A",
+            postalCode: "N/A",
+            country: "N/A",
+        },
+        paymentMethod: "Manual",
         ...prices,
     });
 
