@@ -211,9 +211,9 @@ const Home = () => {
                     </h3>
 
                     <div className="product-prices">
-                      <span className="current-price">${displayPrice}</span>
+                      <span className="current-price">Rs {displayPrice}</span>
                       {product.originalPrice && (
-                        <span className="original-price">${product.originalPrice}</span>
+                        <span className="original-price">Rs {product.originalPrice}</span>
                       )}
                     </div>
                   </div>

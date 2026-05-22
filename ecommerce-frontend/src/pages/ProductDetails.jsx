@@ -155,9 +155,9 @@ const ProductDetails = ({ product, onBack }) => {
 
             <div className="product-pricing">
               {product.originalPrice && (
-                <span className="original-price">${product.originalPrice}</span>
+                <span className="original-price">Rs {product.originalPrice}</span>
               )}
-              <span className="current-price">${displayPrice}</span>
+              <span className="current-price">Rs {displayPrice}</span>
             </div>
 
             <p className="product-description">{product.description}</p>
