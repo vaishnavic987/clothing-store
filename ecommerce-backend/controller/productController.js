@@ -33,25 +33,6 @@ const getProductById = asyncHandler(async (req, res) => {
     }
 })
 
-const deleteProduct = asyncHandler(async (req, res) => {
-    const product = await Product.findById(req.params.id);
-    if (product) {
-        await product.remove();
-        res.json({ message: "Product removed" });
-    } else {
-        res.status(404).json({ message: "Product not found" });
-    }
-})
-
-const createProduct = asyncHandler(async (req, res) => {
-    const product = new Product({
-        name: req.body.name,
-        price: req.body.price,
-    })
-    const createdProduct = await product.save();
-    res.status(201).json(productJSON(req, createdProduct));
-})
-
 
 const createProductReview = asyncHandler(async (req, res) => {
     const { productId, rating, comment } = req.body;
@@ -72,9 +53,4 @@ const createProductReview = asyncHandler(async (req, res) => {
     }
 })
 
-const getTopProducts = asyncHandler(async (req, res) => {
-    const products = await Product.find({}).sort({ rating: -1 }).limit(3);
-    res.json(products.map((p) => productJSON(req, p)));
-})
-
-export { getProducts, getProductById, deleteProduct, createProduct, createProductReview, getTopProducts };
+export { getProducts, getProductById, createProductReview };
