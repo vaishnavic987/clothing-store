@@ -39,21 +39,26 @@ const ProductDetails = ({ product, onBack }) => {
     const displayPrice = product.price >= 100 ? parseFloat((product.price / 100).toFixed(2)) : product.price
     
     dispatch(addToCart({
-      id: productId,
-      name: product.name,
-      price: displayPrice,
-      image: product.image,
-      selectedSize: selectedSize,
-      quantity: 1
-    }))
-
-    await api.post('/orders', {
       product: productId,
       name: product.name,
       price: displayPrice,
       image: product.image,
+      size: selectedSize,
       qty: 1
-    })
+    }))
+
+    try {
+      await api.post('/cart', {
+        product: productId,
+        name: product.name,
+        price: displayPrice,
+        image: product.image,
+        size: selectedSize,
+        qty: 1
+      })
+    } catch (error) {
+      console.error('Error adding to cart:', error)
+    }
   }
 
   const renderStars = (rating) => {
@@ -113,9 +118,7 @@ const ProductDetails = ({ product, onBack }) => {
         </div>
 
         <div className="product-details-content">
-          {/* Left Side - Images */}
           <div className="product-images">
-            {/* Thumbnail Gallery */}
             {productImages.length > 1 && (
               <div className="thumbnail-gallery">
                 {productImages.map((image, index) => (
@@ -130,17 +133,14 @@ const ProductDetails = ({ product, onBack }) => {
               </div>
             )}
 
-            {/* Main Image */}
             <div className="main-image">
               <img src={productImages[selectedImage]} alt={product.name} />
             </div>
           </div>
 
-          {/* Right Side - Product Info */}
           <div className="product-info-section">
             <h1 className="product-title">{product.name}</h1>
 
-            {/* Rating */}
             <div className="product-rating">
               <div className="stars">
                 {renderStars(product.rating || 0)}
@@ -153,7 +153,6 @@ const ProductDetails = ({ product, onBack }) => {
               )}
             </div>
 
-            {/* Price */}
             <div className="product-pricing">
               {product.originalPrice && (
                 <span className="original-price">${product.originalPrice}</span>
@@ -161,10 +160,8 @@ const ProductDetails = ({ product, onBack }) => {
               <span className="current-price">${displayPrice}</span>
             </div>
 
-            {/* Description */}
             <p className="product-description">{product.description}</p>
 
-            {/* Size Selector */}
             {availableSizes.length > 0 && (
               <div className="size-selector">
                 <h3 className="size-label">Select Size</h3>
@@ -185,19 +182,16 @@ const ProductDetails = ({ product, onBack }) => {
               </div>
             )}
 
-            {/* Size Error Message */}
             {sizeError && (
               <div className="size-error-message">
                 {sizeError}
               </div>
             )}
 
-            {/* Add to Cart Button */}
             <button className="add-to-cart-button" onClick={handleAddToCart}>
               ADD TO CART
             </button>
 
-            {/* Category */}
             {product.category && (
               <div className="product-category">
                 <span className="label">Category :</span>
@@ -205,7 +199,6 @@ const ProductDetails = ({ product, onBack }) => {
               </div>
             )}
 
-            {/* Brand */}
             {product.brand && (
               <div className="product-brand">
                 <span className="label">Brand :</span>
@@ -213,7 +206,6 @@ const ProductDetails = ({ product, onBack }) => {
               </div>
             )}
 
-            {/* Tags */}
             {product.tags && product.tags.length > 0 && (
               <div className="product-tags">
                 <span className="label">Tags :</span>

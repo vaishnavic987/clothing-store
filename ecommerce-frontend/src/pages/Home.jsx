@@ -15,18 +15,16 @@ const Home = () => {
   const [loadingMore, setLoadingMore] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
-  const { category: paramCategory } = useParams()
   const location = useLocation()
 
   const searchParams = new URLSearchParams(location.search)
   const searchQuery = searchParams.get('search')
 
   const category = useMemo(() => {
-    if (paramCategory) return paramCategory
     const path = location.pathname.slice(1)
     if (['mens', 'womens', 'kids'].includes(path)) return path
     return null
-  }, [paramCategory, location.pathname])
+  }, [location.pathname])
 
 
   useEffect(() => {
@@ -34,7 +32,7 @@ const Home = () => {
       // Automatically reopen the product details view
       setSelectedProduct(location.state.openProduct)
       
-      // Clear the router state so the page doesn't stubbornly re-open 
+      // Clear the router state so the page doesn't  re-open 
       // the product details view if the user manually reloads the page later
       window.history.replaceState({}, document.title)
     }
@@ -49,6 +47,10 @@ const Home = () => {
         if (searchQuery) {
           url = `/products?search=${encodeURIComponent(searchQuery)}`
         }
+        if (category) {
+          url += `&category=${encodeURIComponent(category.toLowerCase())}`
+        }
+
         const response = await api.get(url)
         const apiProducts = response.data.products || response.data
         setAllProducts(apiProducts)
@@ -62,22 +64,9 @@ const Home = () => {
     }
 
     fetchProducts()
-  }, [searchQuery])
+  }, [searchQuery, category])
 
-  const filteredProducts = useMemo(() => {
-    // If searching, return all products (API already filtered them)
-    if (searchQuery) {
-      return allProducts
-    }
-    
-    if (!category) {
-      return allProducts
-    }
-    return allProducts.filter(product => {
-      const productCategory = product.category || product.mainCategory
-      return productCategory === category.toLowerCase() || productCategory === `${category.toLowerCase()}s`
-    })
-  }, [category, allProducts, searchQuery])
+  const filteredProducts = allProducts
 
   const displayCount = filteredProducts.length
 
@@ -89,7 +78,13 @@ const Home = () => {
     try {
       setLoadingMore(true)
       const nextPage = currentPage + 1
-      const response = await api.get(`/products?pageNumber=${nextPage}`)
+      let url = `/products?pageNumber=${nextPage}`
+      
+      if (category) {
+        url += `&category=${encodeURIComponent(category.toLowerCase())}`
+      }
+      
+      const response = await api.get(url)
       const newProducts = response.data.products || response.data
       
       if (newProducts.length > 0) {
@@ -177,21 +172,6 @@ const Home = () => {
             {!searchQuery ? 'Latest Products' : ''}
           </h2>
           <div className="title-underline"></div>
-        </div>
-
-        {/* Header with product count and sort */}
-        <div className="home-header">
-          {/* <h2 className="product-count">
-            Showing 1 - {displayCount} <span className="total-products">out of {displayCount} Products</span>
-          </h2> */}
-
-          {/* Sort Dropdown */}
-          {/* <div className="sort-dropdown">
-            <button className="sort-button">
-              <span className="sort-text">Sort by</span>
-              <ChevronDown className="sort-icon" />
-            </button>
-          </div> */}
         </div>
 
         <div className="product-grid">
