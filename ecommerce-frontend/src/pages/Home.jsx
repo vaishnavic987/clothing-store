@@ -203,7 +203,7 @@ const Home = () => {
           ) : (
             filteredProducts.map((product) => {
               const productId = product._id || product.id
-              const displayPrice = product.price >= 100 ? (product.price / 100).toFixed(2) : product.price
+              const displayPrice = product.price 
               
               return (
                 <div
