@@ -282,7 +282,7 @@ const Checkout = () => {
 
                         <div className="summary-header">
                             <span>Products</span>
-                            <span>Image</span>
+                            <span>Price</span>
                         </div>
 
                         <div className="products-list">
