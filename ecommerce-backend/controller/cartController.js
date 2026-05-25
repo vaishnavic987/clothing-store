@@ -197,29 +197,4 @@ export const clearCart = asyncHandler(async (req, res) => {
     });
 });
 
-/** POST /api/cart/checkout — create Order from cart, then clear cart */
-export const checkoutCart = asyncHandler(async (req, res) => {
-    const cart = await Cart.findOne({ user: req.user._id });
 
-    if (!cart || !cart.cartItems.length) {
-        res.status(400);
-        throw new Error("Cart is empty");
-    }
-
-    const prices = calcPrices(cart.cartItems);
-    const order = await Order.create({
-        user: req.user._id,
-        orderItems: cart.cartItems.map((item) => ({
-            name: item.name,
-            qty: item.qty,
-            image: item.image,
-            price: item.price,
-            product: item.product,
-            size: item.size,
-        })),
-        ...prices,
-    });
-
-    await cart.deleteOne();
-    res.status(201).json(orderJSON(req, order));
-});

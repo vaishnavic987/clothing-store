@@ -10,6 +10,8 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import orderRoutes from "./routes/orderRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./config/swagger.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
@@ -43,6 +45,12 @@ app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get("/api-docs.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
+
 // --- API (before production SPA) ---
 app.use("/api/products", productRoutes);
 app.get("/api/config/paypal", (req, res) => {
@@ -70,4 +78,5 @@ app.use(notFound);
 app.use(errorHandler);
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+  console.log(`Swagger UI: ${process.env.API_PUBLIC_URL}/api-docs`);
 });
