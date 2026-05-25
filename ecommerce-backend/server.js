@@ -67,10 +67,10 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "..", "frontend", "build")));
+  app.use(express.static(path.join(__dirname, "..", "ecommerce-frontend", "dist")));
   app.get("*", (req, res, next) => {
     if (req.path.startsWith("/api")) return next();
-    res.sendFile(path.join(__dirname, "..", "frontend", "build", "index.html"), (err) => {
+    res.sendFile(path.join(__dirname, "..", "ecommerce-frontend", "dist", "index.html"), (err) => {
       if (err) next(err);
     });
   });

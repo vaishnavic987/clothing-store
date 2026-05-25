@@ -8,7 +8,7 @@
     "start": "nodemon ecommerce-backend/server.js",
     "data:import": "node ecommerce-backend/seeder.js",
     "data:destroy": "node ecommerce-backend/seeder.js -d",
-    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
+    "build": "npm install && npm install --prefix ecommerce-frontend && npm run build --prefix ecommerce-frontend"
   },
   "keywords": [],
   "author": "",
