@@ -69,10 +69,12 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "..", "ecommerce-frontend", "dist")));
-  app.get("*", (req, res, next) => {
+  const spaDist = path.join(__dirname, "..", "ecommerce-frontend", "dist");
+  app.use(express.static(spaDist));
+  // Express 5 requires a named wildcard, not bare "*"
+  app.get("/{*splat}", (req, res, next) => {
     if (req.path.startsWith("/api")) return next();
-    res.sendFile(path.join(__dirname, "..", "ecommerce-frontend", "dist", "index.html"), (err) => {
+    res.sendFile(path.join(spaDist, "index.html"), (err) => {
       if (err) next(err);
     });
   });
