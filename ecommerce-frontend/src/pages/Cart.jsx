@@ -114,8 +114,7 @@ const Cart = () => {
       navigate('/login')
       return
     }
-    // TODO: Navigate to checkout page
-    console.log('Proceeding to checkout')
+    navigate('/checkout')
   }
 
   return (
@@ -175,7 +174,7 @@ const Cart = () => {
                             )}
                           </div>
                         </td>
-                        <td className="price-cell">${item.price}</td>
+                        <td className="price-cell">$ {item.price}</td>
                         <td>
                           <div className="quantity-control-wrapper">
                             <input
@@ -211,7 +210,7 @@ const Cart = () => {
                             )}
                           </div>
                         </td>
-                        <td className="total-cell">${(item.price * item.qty).toFixed(2)}</td>
+                        <td className="total-cell">$ {(item.price * item.qty).toFixed(2)}</td>
                         <td>
                           <button
                             className="remove-btn"

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useParams, useLocation } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -29,11 +29,7 @@ const Home = () => {
 
   useEffect(() => {
     if (location.state?.openProduct) {
-      // Automatically reopen the product details view
       setSelectedProduct(location.state.openProduct)
-      
-      // Clear the router state so the page doesn't  re-open 
-      // the product details view if the user manually reloads the page later
       window.history.replaceState({}, document.title)
     }
   }, [location])
@@ -67,11 +63,10 @@ const Home = () => {
   }, [searchQuery, category])
 
   const filteredProducts = allProducts
-
   const displayCount = filteredProducts.length
 
-  const handleLoadMore = async () => {
-    if (searchQuery) {
+  const handleLoadMore = useCallback(async () => {
+    if (searchQuery || loadingMore || !hasMore) {
       return
     }
     
@@ -100,7 +95,27 @@ const Home = () => {
     } finally {
       setLoadingMore(false)
     }
-  }
+  }, [currentPage, category, searchQuery, loadingMore, hasMore])
+
+  useEffect(() => {
+    const handleScroll = () => {
+
+      const totalPageHeight = document.documentElement.scrollHeight
+      const visibleViewportHeight = window.innerHeight
+      const currentScrollPosition = window.scrollY
+
+      const thresholdBuffer = 100
+      const isNearBottom = (visibleViewportHeight + currentScrollPosition) >= (totalPageHeight - thresholdBuffer)
+
+      if (isNearBottom) {
+        handleLoadMore()
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [currentPage, category, searchQuery, loadingMore, hasMore, loading])
 
   const handleProductClick = (product) => {
     setSelectedProduct(product)
@@ -188,7 +203,7 @@ const Home = () => {
           ) : (
             filteredProducts.map((product) => {
               const productId = product._id || product.id
-              const displayPrice = product.price >= 100 ? (product.price / 100).toFixed(2) : product.price
+              const displayPrice = product.price 
               
               return (
                 <div
@@ -223,37 +238,16 @@ const Home = () => {
           )}
         </div>
 
-        {hasMore && !loading && !searchQuery && filteredProducts.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '2rem' }}>
-            <button
-              onClick={handleLoadMore}
-              disabled={loadingMore}
-              style={{
-                padding: '0.75rem 2rem',
-                fontSize: '1rem',
-                fontWeight: '600',
-                backgroundColor: loadingMore ? '#ccc' : '#ff4141',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: loadingMore ? 'not-allowed' : 'pointer',
-                transition: 'all 0.3s ease',
-              }}
-              onMouseEnter={(e) => {
-                if (!loadingMore) {
-                  e.target.style.backgroundColor = '#e63939'
-                  e.target.style.transform = 'translateY(-2px)'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loadingMore) {
-                  e.target.style.backgroundColor = '#ff4141'
-                  e.target.style.transform = 'translateY(0)'
-                }
-              }}
-            >
-              {loadingMore ? 'Loading...' : 'View More'}
-            </button>
+        {loadingMore && (
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            padding: '2rem 0',
+            color: '#666', 
+            fontWeight: '600', 
+            fontSize: '1rem' 
+          }}>
+            Loading more products...
           </div>
         )}
       </main>

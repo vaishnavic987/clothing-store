@@ -78,7 +78,7 @@ const ProductDetails = ({ product, onBack }) => {
 
   const availableSizes = product.size || product.sizes || []
   const productImages = product.images || [product.image]
-  const displayPrice = product.price >= 100 ? (product.price / 100).toFixed(2) : product.price
+  const displayPrice = product.price
   const productCategory = product.category || 'Product'
 
   return (
