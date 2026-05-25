@@ -193,36 +193,3 @@
         transform: rotate(360deg);
     }
 }
-
-@media (max-width: 768px) {
-    .order-success-main {
-        padding: 40px 15px;
-    }
-
-    .success-container {
-        padding: 40px 25px;
-    }
-
-    .success-container h1 {
-        font-size: 2rem;
-    }
-
-    .success-message {
-        font-size: 1rem;
-    }
-
-    .order-details {
-        padding: 20px;
-    }
-
-    .detail-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
-    }
-
-    .continue-shopping-btn {
-        width: 100%;
-        justify-content: center;
-    }
-}

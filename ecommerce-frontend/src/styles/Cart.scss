@@ -81,12 +81,8 @@
 
   .cart-content {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 400px;
     gap: 2rem;
-
-    @media (min-width: 1024px) {
-      grid-template-columns: 1fr 400px;
-    }
   }
 
   .cart-table-wrapper {
@@ -375,22 +371,4 @@
     }
   }
 
-  @media (max-width: 768px) {
-    .cart-table {
-      font-size: 0.85rem;
-
-      .product-image-cell img {
-        width: 60px;
-        height: 60px;
-      }
-
-      .product-title {
-        font-size: 0.85rem;
-      }
-
-      td {
-        padding: 1rem 0.5rem;
-      }
-    }
-  }
 }

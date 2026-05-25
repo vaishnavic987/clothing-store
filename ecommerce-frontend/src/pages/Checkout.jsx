@@ -132,7 +132,7 @@ const Checkout = () => {
                         <form id="checkout-form" onSubmit={handleProceedToPayment}>
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>First Name</label>
+                                    <label>First Name <span class="required-star" aria-hidden="true">*</span></label>
                                     <input
                                         type="text"
                                         name="firstName"
@@ -143,7 +143,7 @@ const Checkout = () => {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>Last Name</label>
+                                    <label>Last Name <span class="required-star" aria-hidden="true">*</span></label>
                                     <input
                                         type="text"
                                         name="lastName"
@@ -156,7 +156,7 @@ const Checkout = () => {
                             </div>
 
                             <div className="form-group">
-                                <label>Email Address</label>
+                                <label>Email Address <span class="required-star" aria-hidden="true">*</span></label>
                                 <input
                                     type="email"
                                     name="email"
@@ -167,7 +167,7 @@ const Checkout = () => {
                             </div>
 
                             <div className="form-group">
-                                <label>Shipping Address</label>
+                                <label>Shipping Address <span class="required-star" aria-hidden="true">*</span></label>
                                 <input
                                     type="text"
                                     name="shippingAddress"
@@ -179,7 +179,7 @@ const Checkout = () => {
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>City</label>
+                                    <label>City <span class="required-star" aria-hidden="true">*</span></label>
                                     <input
                                         type="text"
                                         name="city"
@@ -189,7 +189,7 @@ const Checkout = () => {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>ZIP/Postal Code</label>
+                                    <label>ZIP/Postal Code <span class="required-star" aria-hidden="true">*</span></label>
                                     <input
                                         type="text"
                                         name="zipCode"
@@ -204,7 +204,7 @@ const Checkout = () => {
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Country</label>
+                                    <label>Country <span class="required-star" aria-hidden="true">*</span></label>
                                     <select
                                         name="country"
                                         value={formData.country}
@@ -216,7 +216,7 @@ const Checkout = () => {
                                 </div>
                                 <div className="form-group">
                                     <label>
-                                        State
+                                        State <span class="required-star" aria-hidden="true">*</span>
                                     </label>
                                     <select
                                         name="state"
@@ -237,7 +237,7 @@ const Checkout = () => {
                             </div>
 
                             <div className="form-group">
-                                <label>Phone Number</label>
+                                <label>Phone Number <span class="required-star" aria-hidden="true">*</span></label>
                                 <input
                                     type="tel"
                                     name="phoneNumber"
