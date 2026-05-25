@@ -17,12 +17,14 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
-const port = process.env.PORT || 3000;
+const port = Number(process.env.PORT) || 3000;
+const host = "0.0.0.0";
+
 if (!process.env.API_PUBLIC_URL?.trim()) {
-  process.env.API_PUBLIC_URL = `http://localhost:${port}`;
+  process.env.API_PUBLIC_URL =
+    process.env.RENDER_EXTERNAL_URL || `http://localhost:${port}`;
 }
 
-connectDB();
 const app = express();
 
 const clientOrigins = process.env.CLIENT_URL?.split(",")
@@ -78,7 +80,16 @@ if (process.env.NODE_ENV === "production") {
 
 app.use(notFound);
 app.use(errorHandler);
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-  console.log(`Swagger UI: ${process.env.API_PUBLIC_URL}/api-docs`);
+
+const startServer = async () => {
+  await connectDB();
+  app.listen(port, host, () => {
+    console.log(`Server listening on http://${host}:${port}`);
+    console.log(`Swagger UI: ${process.env.API_PUBLIC_URL}/api-docs`);
+  });
+};
+
+startServer().catch((err) => {
+  console.error("Failed to start server:", err);
+  process.exit(1);
 });

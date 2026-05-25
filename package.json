@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon ecommerce-backend/server.js",
+    "start:prod": "node ecommerce-backend/server.js",
     "data:import": "node ecommerce-backend/seeder.js",
     "data:destroy": "node ecommerce-backend/seeder.js -d",
     "build": "npm install && npm install --prefix ecommerce-frontend && npm run build --prefix ecommerce-frontend"
