@@ -78,7 +78,7 @@ const ProductDetails = ({ product, onBack }) => {
 
   const availableSizes = product.size || product.sizes || []
   const productImages = product.images || [product.image]
-  const displayPrice = product.price >= 100 ? (product.price / 100).toFixed(2) : product.price
+  const displayPrice = product.price
   const productCategory = product.category || 'Product'
 
   return (
@@ -155,9 +155,9 @@ const ProductDetails = ({ product, onBack }) => {
 
             <div className="product-pricing">
               {product.originalPrice && (
-                <span className="original-price">Rs {product.originalPrice}</span>
+                <span className="original-price">${product.originalPrice}</span>
               )}
-              <span className="current-price">Rs {displayPrice}</span>
+              <span className="current-price">${displayPrice}</span>
             </div>
 
             <p className="product-description">{product.description}</p>

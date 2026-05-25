@@ -174,7 +174,7 @@ const Cart = () => {
                             )}
                           </div>
                         </td>
-                        <td className="price-cell">Rs {item.price}</td>
+                        <td className="price-cell">$ {item.price}</td>
                         <td>
                           <div className="quantity-control-wrapper">
                             <input
@@ -210,7 +210,7 @@ const Cart = () => {
                             )}
                           </div>
                         </td>
-                        <td className="total-cell">Rs {(item.price * item.qty).toFixed(2)}</td>
+                        <td className="total-cell">$ {(item.price * item.qty).toFixed(2)}</td>
                         <td>
                           <button
                             className="remove-btn"
@@ -234,17 +234,17 @@ const Cart = () => {
 
                 <div className="totals-row">
                   <span>Subtotal</span>
-                  <span className="amount">Rs {totalAmount.toFixed(2)}</span>
+                  <span className="amount">${totalAmount.toFixed(2)}</span>
                 </div>
 
                 <div className="totals-row">
                   <span>Shipping Fee</span>
-                  <span className="amount">{shippingFee === 0 ? 'Free' : `Rs ${shippingFee}`}</span>
+                  <span className="amount">{shippingFee === 0 ? 'Free' : `$${shippingFee}`}</span>
                 </div>
 
                 <div className="totals-row total">
                   <span>Total</span>
-                  <span className="amount">Rs {total.toFixed(2)}</span>
+                  <span className="amount">${total.toFixed(2)}</span>
                 </div>
 
                 <button className="checkout-btn" onClick={handleCheckout}>

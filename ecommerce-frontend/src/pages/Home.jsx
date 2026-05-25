@@ -188,7 +188,7 @@ const Home = () => {
           ) : (
             filteredProducts.map((product) => {
               const productId = product._id || product.id
-              const displayPrice = product.price >= 100 ? (product.price / 100).toFixed(2) : product.price
+              const displayPrice = product.price 
               
               return (
                 <div
@@ -211,9 +211,9 @@ const Home = () => {
                     </h3>
 
                     <div className="product-prices">
-                      <span className="current-price">Rs {displayPrice}</span>
+                      <span className="current-price">${displayPrice}</span>
                       {product.originalPrice && (
-                        <span className="original-price">Rs {product.originalPrice}</span>
+                        <span className="original-price">${product.originalPrice}</span>
                       )}
                     </div>
                   </div>

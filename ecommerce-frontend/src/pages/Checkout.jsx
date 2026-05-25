@@ -70,7 +70,6 @@ const Checkout = () => {
             return
         }
 
-        console.log('Proceeding to payment with data:', formData)
         const response = await api.post('/payments/create-checkout-session', {
             items,
             shippingDetails: formData,
@@ -81,8 +80,7 @@ const Checkout = () => {
                 total
             }
         })
-        console.log('Order created:', response.data)
-        console.log('Order summary:', { subtotal, tax, shipping: selectedShippingFee, total })
+
 
         const { sessionId, url } = response.data
 
@@ -218,7 +216,6 @@ const Checkout = () => {
                                 </div>
                                 <div className="form-group">
                                     <label>
-                                        {/* {formData.country === 'UAE' ? 'Emirate' : 'State / Province'} */}
                                         State
                                     </label>
                                     <select
@@ -228,7 +225,6 @@ const Checkout = () => {
                                         required
                                     >
                                         <option value="">
-                                            {/* Select {formData.country === 'UAE' ? 'Emirate' : 'State'} */}
                                             Select State
                                         </option>
                                         {regionsByCountry[formData.country].map((region) => (
@@ -264,7 +260,7 @@ const Checkout = () => {
                                             checked={formData.shippingMethod === 'standard'}
                                             onChange={() => handleShippingMethodChange('standard')}
                                         />
-                                        <span>Standard (3-5 days) - Rs 8.00</span>
+                                        <span>Standard (3-5 days) - $8.00</span>
                                     </label>
                                     <label className="shipping-option">
                                         <input
@@ -274,7 +270,7 @@ const Checkout = () => {
                                             checked={formData.shippingMethod === 'express'}
                                             onChange={() => handleShippingMethodChange('express')}
                                         />
-                                        <span>Express (1-2 days) - Rs 18.00</span>
+                                        <span>Express (1-2 days) - $18.00</span>
                                     </label>
                                 </div>
                             </div>
@@ -299,12 +295,12 @@ const Checkout = () => {
                                             <p className="product-name">{item.name}</p>
                                             <p className="product-qty">Qty: {item.qty}</p>
                                             {item.qty > 1 && (
-                                                <p className="product-unit-price">Rs {item.price} each</p>
+                                                <p className="product-unit-price">${item.price} each</p>
                                             )}
                                         </div>
                                     </div>
                                     <div className="product-price">
-                                        Rs {(item.price * item.qty).toFixed(2)}
+                                        ${(item.price * item.qty).toFixed(2)}
                                     </div>
                                 </div>
                             ))}
@@ -317,22 +313,22 @@ const Checkout = () => {
 
                             <div className="total-row">
                                 <span>Subtotal:</span>
-                                <span>Rs {subtotal.toFixed(2)}</span>
+                                <span>${subtotal.toFixed(2)}</span>
                             </div>
 
                             <div className="total-row">
                                 <span>Shipping:</span>
-                                <span>Rs {selectedShippingFee.toFixed(2)} (Standard)</span>
+                                <span>${selectedShippingFee.toFixed(2)} (Standard)</span>
                             </div>
 
                             <div className="total-row">
                                 <span>{`Tax ${formData.country === 'UAE' ? '(VAT)' : '(GST)'}:`}</span>
-                                <span>Rs {tax.toFixed(2)}</span>
+                                <span>${tax.toFixed(2)}</span>
                             </div>
 
                             <div className="total-row grand-total">
                                 <span>Total:</span>
-                                <span>Rs {total.toFixed(2)}</span>
+                                <span>${total.toFixed(2)}</span>
                             </div>
                         </div>
 

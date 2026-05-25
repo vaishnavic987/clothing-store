@@ -111,7 +111,7 @@ const OrderSuccess = () => {
                             {orderDetails.totalPrice && (
                                 <div className="detail-item">
                                     <span className="detail-label">Total Amount:</span>
-                                    <span className="detail-value">Rs {orderDetails.totalPrice.toFixed(2)}</span>
+                                    <span className="detail-value">${orderDetails.totalPrice.toFixed(2)}</span>
                                 </div>
                             )}
                         </div>
