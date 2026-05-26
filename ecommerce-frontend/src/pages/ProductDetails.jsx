@@ -134,7 +134,7 @@ const ProductDetails = () => {
               <button className="modal-btn cancel" onClick={() => setShowLoginModal(false)}>
                 Cancel
               </button>
-              <button className="modal-btn login" onClick={() => navigate('/login', { state: { redirectToProduct: product } })}>
+              <button className="modal-btn login" onClick={() => navigate('/login', { state: { redirectToProductId: id } })}>
                 Go to Login
               </button>
             </div>
