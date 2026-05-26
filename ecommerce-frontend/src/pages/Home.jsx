@@ -24,14 +24,6 @@ const Home = () => {
 
 
   useEffect(() => {
-    if (location.state?.openProduct) {
-      setSelectedProduct(location.state.openProduct)
-      window.history.replaceState({}, document.title)
-    }
-  }, [location])
-
-
-  useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true)

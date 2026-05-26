@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../store/authSlice';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import '../styles/Signup.scss';
@@ -16,6 +16,7 @@ const Signup = () => {
   const [error, setError] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -65,7 +66,13 @@ const Signup = () => {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(userData));
 
-      navigate('/');
+      const redirectToProductId = location.state?.redirectToProductId;
+
+      if (redirectToProductId) {
+        navigate(`/product/${redirectToProductId}`);
+      } else {
+        navigate('/');
+      }
       
     } catch (err) {
       console.log('Signup error:', err)
@@ -169,7 +176,7 @@ const Signup = () => {
         
         <p className="login-link">
           Already have an account?{' '}
-          <Link to="/login">
+          <Link to="/login" state={location.state}>
             Login here
           </Link>
         </p>

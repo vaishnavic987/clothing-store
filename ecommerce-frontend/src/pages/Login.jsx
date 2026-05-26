@@ -39,10 +39,10 @@ const Login = () => {
 
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(userData));
-      const redirectToProduct = location.state?.redirectToProduct;
+      const redirectToProductId = location.state?.redirectToProductId;
 
-      if (redirectToProduct) {
-        navigate('/', { state: { openProduct: redirectToProduct } });
+      if (redirectToProductId) {
+        navigate(`/product/${redirectToProductId}`);
       } else {
         navigate('/');
       }      
@@ -114,7 +114,7 @@ const Login = () => {
         
         <p className="signup-link">
           Don't have an account?{' '}
-          <Link to="/signup">
+          <Link to="/signup" state={location.state}>
             Sign up here
           </Link>
         </p>
