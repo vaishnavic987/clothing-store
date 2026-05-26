@@ -8,6 +8,7 @@ import Home from './pages/Home'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import OrderSuccess from './pages/OrderSuccess'
+import ProductDetails from './pages/ProductDetails'
 
 function App() {
   const dispatch = useDispatch();
@@ -36,6 +37,7 @@ function App() {
       <Route path="/mens" element={<Home />} />
       <Route path="/womens" element={<Home />} />
       <Route path="/kids" element={<Home />} />
+      <Route path="/product/:id" element={<ProductDetails />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup/>} />
       <Route path="/cart" element={<Cart />} />

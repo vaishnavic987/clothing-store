@@ -1,16 +1,15 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { useParams, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import ProductDetails from './ProductDetails'
 import { ChevronDown } from 'lucide-react'
 import '../styles/Home.scss'
 import api from '../services/axios'
 
 const Home = () => {
+  const navigate = useNavigate()
   const [sortBy, setSortBy] = useState('relevant')
   const [allProducts, setAllProducts] = useState([])
-  const [selectedProduct, setSelectedProduct] = useState(null)
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
@@ -118,15 +117,8 @@ const Home = () => {
   }, [currentPage, category, searchQuery, loadingMore, hasMore, loading])
 
   const handleProductClick = (product) => {
-    setSelectedProduct(product)
-  }
-
-  const handleBackToProducts = () => {
-    setSelectedProduct(null)
-  }
-
-  if (selectedProduct) {
-    return <ProductDetails product={selectedProduct} onBack={handleBackToProducts} />
+    const productId = product._id || product.id
+    navigate(`/product/${productId}`)
   }
 
   if (loading) {
