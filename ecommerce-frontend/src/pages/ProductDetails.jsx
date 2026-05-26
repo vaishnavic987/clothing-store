@@ -57,12 +57,11 @@ const ProductDetails = () => {
     
     setSizeError('')
     const productId = product._id || product.id
-    const displayPrice = product.price >= 100 ? parseFloat((product.price / 100).toFixed(2)) : product.price
     
     dispatch(addToCart({
       product: productId,
       name: product.name,
-      price: displayPrice,
+      price: product.price,
       image: product.image,
       size: selectedSize,
       qty: 1
@@ -72,7 +71,7 @@ const ProductDetails = () => {
       await api.post('/cart', {
         product: productId,
         name: product.name,
-        price: displayPrice,
+        price: product.price,
         image: product.image,
         size: selectedSize,
         qty: 1
@@ -117,10 +116,7 @@ const ProductDetails = () => {
     )
   }
 
-  const availableSizes = product.size || product.sizes || []
-  const productImage = product.image
-  const displayPrice = product.price
-  const productCategory = product.category || 'Product'
+  const availableSizes = product.size 
 
   return (
     <div className="product-details-page">
@@ -162,7 +158,7 @@ const ProductDetails = () => {
           <div className="product-images">
 
             <div className="main-image">
-              <img src={productImage} alt={product.name} />
+              <img src={product.image} alt={product.name} />
             </div>
           </div>
 
@@ -182,7 +178,7 @@ const ProductDetails = () => {
               {product.originalPrice && (
                 <span className="original-price">${product.originalPrice}</span>
               )}
-              <span className="current-price">${displayPrice}</span>
+              <span className="current-price">${product.price}</span>
             </div>
 
             <p className="product-description">{product.description}</p>

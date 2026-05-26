@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -19,11 +19,8 @@ const Home = () => {
   const searchParams = new URLSearchParams(location.search)
   const searchQuery = searchParams.get('search')
 
-  const category = useMemo(() => {
-    const path = location.pathname.slice(1)
-    if (['mens', 'womens', 'kids'].includes(path)) return path
-    return null
-  }, [location.pathname])
+  const path = location.pathname.slice(1)
+  const category = ['mens', 'womens', 'kids'].includes(path) ? path : null
 
 
   useEffect(() => {
