@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -8,19 +8,40 @@ import { addToCart } from '../store/cartSlice'
 import api from '../services/axios'
 import '../styles/ProductDetails.scss'
 
-const ProductDetails = ({ product, onBack }) => {
+const ProductDetails = () => {
+  const { id } = useParams()
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { isAuthenticated } = useSelector(state => state.auth)
+  const [product, setProduct] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [selectedSize, setSelectedSize] = useState('')
-  const [selectedImage, setSelectedImage] = useState(0)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [sizeError, setSizeError] = useState('')
 
   useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true)
+        const response = await api.get(`/products/${id}`)
+        setProduct(response.data)
+      } catch (error) {
+        console.error('Failed to fetch product:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (id) {
+      fetchProduct()
+    }
+  }, [id])
+
+  useEffect(() => {
     // Reset selections when product changes
-    setSelectedImage(0)
-    setSelectedSize('')
+    if (product) {
+      setSelectedSize('')
+    }
   }, [product])
 
   const handleAddToCart = async() => {
@@ -36,12 +57,11 @@ const ProductDetails = ({ product, onBack }) => {
     
     setSizeError('')
     const productId = product._id || product.id
-    const displayPrice = product.price >= 100 ? parseFloat((product.price / 100).toFixed(2)) : product.price
     
     dispatch(addToCart({
       product: productId,
       name: product.name,
-      price: displayPrice,
+      price: product.price,
       image: product.image,
       size: selectedSize,
       qty: 1
@@ -51,7 +71,7 @@ const ProductDetails = ({ product, onBack }) => {
       await api.post('/cart', {
         product: productId,
         name: product.name,
-        price: displayPrice,
+        price: product.price,
         image: product.image,
         size: selectedSize,
         qty: 1
@@ -72,14 +92,31 @@ const ProductDetails = ({ product, onBack }) => {
     ))
   }
 
-  if (!product) {
-    return <div>Loading...</div>
+  if (loading) {
+    return (
+      <div className="product-details-page">
+        <Navbar />
+        <div className="loader-container">
+          <div className="loader"></div>
+          <p className="loader-text">Loading product...</p>
+        </div>
+      </div>
+    )
   }
 
-  const availableSizes = product.size || product.sizes || []
-  const productImages = product.images || [product.image]
-  const displayPrice = product.price
-  const productCategory = product.category || 'Product'
+  if (!product) {
+    return (
+      <div className="product-details-page">
+        <Navbar />
+        <div className="loader-container">
+          <p>Product not found</p>
+          <button onClick={() => navigate('/')}>Return to Home</button>
+        </div>
+      </div>
+    )
+  }
+
+  const availableSizes = product.size 
 
   return (
     <div className="product-details-page">
@@ -106,35 +143,22 @@ const ProductDetails = ({ product, onBack }) => {
       )}
       
       <main className="product-details-main">
-        <button className="back-button" onClick={onBack}>
+        <button className="back-button" onClick={() => navigate(-1)}>
           <ArrowLeft size={20} />
           <span>Back to Products</span>
         </button>
 
         <div className="breadcrumb">
-          <span className="breadcrumb-item" onClick={onBack}>HOME</span>
+          <span className="breadcrumb-item" onClick={() => navigate('/')}>HOME</span>
           <ChevronRight size={16} className="breadcrumb-separator" />
           <span className="breadcrumb-item active">{product.name}</span>
         </div>
 
         <div className="product-details-content">
           <div className="product-images">
-            {productImages.length > 1 && (
-              <div className="thumbnail-gallery">
-                {productImages.map((image, index) => (
-                  <div
-                    key={index}
-                    className={`thumbnail ${selectedImage === index ? 'active' : ''}`}
-                    onClick={() => setSelectedImage(index)}
-                  >
-                    <img src={image} alt={`${product.name} ${index + 1}`} />
-                  </div>
-                ))}
-              </div>
-            )}
 
             <div className="main-image">
-              <img src={productImages[selectedImage]} alt={product.name} />
+              <img src={product.image} alt={product.name} />
             </div>
           </div>
 
@@ -148,16 +172,13 @@ const ProductDetails = ({ product, onBack }) => {
               {product.numReviews !== undefined && (
                 <span className="review-count">({product.numReviews})</span>
               )}
-              {product.reviewCount !== undefined && (
-                <span className="review-count">({product.reviewCount})</span>
-              )}
             </div>
 
             <div className="product-pricing">
               {product.originalPrice && (
                 <span className="original-price">${product.originalPrice}</span>
               )}
-              <span className="current-price">${displayPrice}</span>
+              <span className="current-price">${product.price}</span>
             </div>
 
             <p className="product-description">{product.description}</p>
@@ -203,13 +224,6 @@ const ProductDetails = ({ product, onBack }) => {
               <div className="product-brand">
                 <span className="label">Brand :</span>
                 <span className="value">{product.brand}</span>
-              </div>
-            )}
-
-            {product.tags && product.tags.length > 0 && (
-              <div className="product-tags">
-                <span className="label">Tags :</span>
-                <span className="value">{product.tags.join(', ')}</span>
               </div>
             )}
           </div>
