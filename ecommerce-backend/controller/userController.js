@@ -75,23 +75,71 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 
 
-// @desc  Get saved address for logged-in user
-// @route GET /api/users/address
-// @access Private
+const addressFromBody = (body) => ({
+    firstName: body.firstName ?? "",
+    lastName: body.lastName ?? "",
+    email: body.email ?? "",
+    shippingAddress: body.shippingAddress ?? "",
+    city: body.city ?? "",
+    state: body.state ?? "",
+    zipCode: body.zipCode ?? "",
+    country: body.country ?? "India",
+    phoneNumber: body.phoneNumber ?? "",
+});
+
+const nextAddressId = (addresses) =>
+    addresses.length ? Math.max(...addresses.map((a) => a.addressId)) + 1 : 1;
+
+const toJSON = (addr) => ({
+    id: addr.addressId,
+    firstName: addr.firstName,
+    lastName: addr.lastName,
+    email: addr.email,
+    shippingAddress: addr.shippingAddress,
+    city: addr.city,
+    state: addr.state,
+    zipCode: addr.zipCode,
+    country: addr.country,
+    phoneNumber: addr.phoneNumber,
+});
+
+// GET /api/users/address
 const getAddress = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id).select("savedAddress");
-    res.json(user.savedAddress || {});
+    const user = await User.findById(req.user._id).select("savedAddresses");
+    res.json({ address: (user?.savedAddresses ?? []).map(toJSON) });
 });
 
-// @desc  Save / update address for logged-in user
-// @route PUT /api/users/address
-// @access Private
-const saveAddress = asyncHandler(async (req, res) => {
-    const { firstName, lastName, email, shippingAddress, city, state, zipCode, country, phoneNumber } = req.body;
-    await User.findByIdAndUpdate(req.user._id, {
-        savedAddress: { firstName, lastName, email, shippingAddress, city, state, zipCode, country, phoneNumber },
-    });
-    res.json({ message: "Address saved successfully" });
+// POST /api/users/address
+const addAddress = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    const newAddress = {
+        addressId: nextAddressId(user.savedAddresses),
+        ...addressFromBody(req.body),
+    };
+    user.savedAddresses.push(newAddress);
+    await user.save();
+    res.status(201).json(toJSON(newAddress));
 });
 
-export { authUser, registerUser, logoutUser, getAddress, saveAddress };
+// DELETE /api/users/address/:addressId
+const deleteAddress = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    const id = Number(req.params.addressId);
+    const before = user.savedAddresses.length;
+    user.savedAddresses = user.savedAddresses.filter((a) => a.addressId !== id);
+    if (user.savedAddresses.length === before) {
+        res.status(404);
+        throw new Error("Address not found");
+    }
+    await user.save();
+    res.json({ message: "Address deleted", id });
+});
+
+export {
+    authUser,
+    registerUser,
+    logoutUser,
+    getAddress,
+    addAddress,
+    deleteAddress,
+};
