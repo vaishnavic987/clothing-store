@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { Lock } from 'lucide-react'
+import { Lock, Plus, Trash2 } from 'lucide-react' 
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import '../styles/Checkout.scss'
@@ -10,12 +10,17 @@ import { loadStripe } from '@stripe/stripe-js'
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 
+const normalizeAddress = (address) => ({
+    ...address,
+    id: address.id || address._id
+})
+
 const Checkout = () => {
     const navigate = useNavigate()
     const { items, totalAmount } = useSelector(state => state.cart)
     const { isAuthenticated } = useSelector(state => state.auth)
 
-    const [formData, setFormData] = useState({
+    const initialFormState = {
         firstName: '',
         lastName: '',
         email: '',
@@ -26,8 +31,55 @@ const Checkout = () => {
         country: 'India',
         phoneNumber: '',
         shippingMethod: 'standard'
-    })
+    }
 
+    const [savedAddresses, setSavedAddresses] = useState([])
+    const [selectedAddressId, setSelectedAddressId] = useState('new')
+    const [saveNewAddress, setSaveNewAddress] = useState(false)
+    const [formData, setFormData] = useState(initialFormState)
+    const [isLoadingAddress, setIsLoadingAddress] = useState(true)
+
+    const fetchSavedAddresses = async () => {
+        if (!isAuthenticated) {
+            setSavedAddresses([])
+            setSelectedAddressId('new')
+            setFormData(initialFormState)
+            setIsLoadingAddress(false)
+            return
+        }
+
+        try {
+            const response = await api.get('/users/address')
+
+            const processedAddresses = Array.isArray(response.data?.address)
+                ? response.data.address.map(normalizeAddress)
+                : []
+
+            if (processedAddresses.length > 0) {
+                const preservedSelection = processedAddresses.find(addr => addr.id === selectedAddressId)
+                const defaultAddr = preservedSelection || processedAddresses[0]
+
+                setSavedAddresses(processedAddresses)
+                setSelectedAddressId(defaultAddr.id)
+                setFormData(prev => ({ ...defaultAddr, shippingMethod: prev.shippingMethod }))
+            } else {
+                setSavedAddresses([])
+                setSelectedAddressId('new')
+                setFormData(prev => ({ ...initialFormState, shippingMethod: prev.shippingMethod }))
+            }
+        } catch (error) {
+            console.error('Failed to retrieve addresses profile:', error)
+            setSavedAddresses([])
+            setSelectedAddressId('new')
+            setFormData(prev => ({ ...initialFormState, shippingMethod: prev.shippingMethod }))
+        } finally {
+            setIsLoadingAddress(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchSavedAddresses()
+    }, [isAuthenticated])
 
     const shippingFees = {
         standard: 8.00,
@@ -46,8 +98,20 @@ const Checkout = () => {
             'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala',
             'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland',
             'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
-            'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi', 'Jamnu & Kashmir'
+            'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi', 'Jammu & Kashmir'
         ]
+    }
+
+    const handleAddressSelect = (id) => {
+        setSelectedAddressId(id)
+        if (id === 'new') {
+            setFormData({ ...initialFormState, shippingMethod: formData.shippingMethod })
+        } else {
+            const address = savedAddresses.find(addr => addr.id === id)
+            if (address) {
+                setFormData({ ...address, shippingMethod: formData.shippingMethod })
+            }
+        }
     }
 
     const handleInputChange = (e) => {
@@ -62,6 +126,23 @@ const Checkout = () => {
         setFormData(prev => ({ ...prev, shippingMethod: method }))
     }
 
+    const handleDeleteAddress = async (e, id) => {
+        e.stopPropagation()
+        
+        try {
+            await api.delete(`/users/address/${id}`)
+            
+            if (selectedAddressId === id) {
+                setSelectedAddressId('new')
+                setFormData(initialFormState)
+            }
+            
+            await fetchSavedAddresses()
+        } catch (error) {
+            console.error("Failed to delete address:", error)
+        }
+    }
+
     const handleProceedToPayment = async (e) => {
         e.preventDefault()
 
@@ -70,33 +151,36 @@ const Checkout = () => {
             return
         }
 
-        const response = await api.post('/payments/create-checkout-session', {
-            items,
-            shippingDetails: formData,
-            orderSummary: {
-                subtotal,
-                tax,
-                shipping: selectedShippingFee,
-                total
+        try {
+            if (selectedAddressId === 'new' && saveNewAddress && savedAddresses.length < 3) {
+                const { shippingMethod, id, ...addressPayload } = formData
+                await api.post('/users/address', addressPayload)
+                await fetchSavedAddresses()
             }
-        })
 
+            const response = await api.post('/payments/create-checkout-session', {
+                items,
+                shippingDetails: formData,
+                orderSummary: {
+                    subtotal,
+                    tax,
+                    shipping: selectedShippingFee,
+                    total
+                }
+            })
 
-        const { sessionId, url } = response.data
+            const { sessionId, url } = response.data
+            const stripe = await stripePromise
+            if (!stripe) return
 
-        const stripe = await stripePromise
-        if (!stripe) {
-            console.log("Stripe failed to load properly.")
-        }
-
-
-        if (url) {
-            window.location.href = url
-        } else {
-            const result = await stripe.redirectToCheckout({ sessionId })
-            if (result.error) {
-                alert(result.error.message)
+            if (url) {
+                window.location.href = url
+            } else {
+                const result = await stripe.redirectToCheckout({ sessionId })
+                if (result.error) alert(result.error.message)
             }
+        } catch (error) {
+            console.error("Checkout process encountered an error:", error)
         }
     }
 
@@ -127,75 +211,122 @@ const Checkout = () => {
 
                 <div className="checkout-content">
                     <div className="shipping-section">
-                        <h2>Shipping Information</h2>
+                        {!isLoadingAddress && savedAddresses.length > 0 && (
+                            <div className="saved-addresses-wrapper">
+                                <h2>Select Delivery Address</h2>
+                                <div className="saved-addresses-grid">
+                                    {savedAddresses.map((addr) => (
+                                        <div 
+                                            key={addr.id} 
+                                            className={`address-card ${selectedAddressId === addr.id ? 'active' : ''}`}
+                                            onClick={() => handleAddressSelect(addr.id)}
+                                        >
+                                            <div className="card-header">
+                                                <span className="name">{addr.firstName} {addr.lastName}</span>
+                                                <div className="card-actions">
+                                                    <button 
+                                                        type="button" 
+                                                        className="delete-address-btn"
+                                                        onClick={(e) => handleDeleteAddress(e, addr.id)}
+                                                        title="Delete Address"
+                                                    >
+                                                        <Trash2 size={15} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <p className="address-text">{addr.shippingAddress}, {addr.city}, {addr.state} - {addr.zipCode}</p>
+                                            <p className="phone-text">Phone: {addr.phoneNumber}</p>
+                                        </div>
+                                    ))}
+                                    
+                                    {savedAddresses.length < 4 && (
+                                        <div 
+                                            className={`address-card add-new-card ${selectedAddressId === 'new' ? 'active' : ''}`}
+                                            onClick={() => handleAddressSelect('new')}
+                                        >
+                                            <Plus size={24} />
+                                            <span>Use a new address</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        <h2>{selectedAddressId === 'new' ? 'Add New Shipping Information' : 'Shipping Information'}</h2>
 
                         <form id="checkout-form" onSubmit={handleProceedToPayment}>
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>First Name <span class="required-star" aria-hidden="true">*</span></label>
+                                    <label>First Name <span className="required-star" aria-hidden="true">*</span></label>
                                     <input
                                         type="text"
                                         name="firstName"
                                         value={formData.firstName}
                                         onChange={handleInputChange}
                                         required
+                                        disabled={selectedAddressId !== 'new'}
                                         minLength={3}
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>Last Name <span class="required-star" aria-hidden="true">*</span></label>
+                                    <label>Last Name <span className="required-star" aria-hidden="true">*</span></label>
                                     <input
                                         type="text"
                                         name="lastName"
                                         value={formData.lastName}
                                         onChange={handleInputChange}
                                         required
+                                        disabled={selectedAddressId !== 'new'}
                                         minLength={3}
                                     />
                                 </div>
                             </div>
 
                             <div className="form-group">
-                                <label>Email Address <span class="required-star" aria-hidden="true">*</span></label>
+                                <label>Email Address <span className="required-star" aria-hidden="true">*</span></label>
                                 <input
                                     type="email"
                                     name="email"
                                     value={formData.email}
                                     onChange={handleInputChange}
                                     required
+                                    disabled={selectedAddressId !== 'new'}
                                 />
                             </div>
 
                             <div className="form-group">
-                                <label>Shipping Address <span class="required-star" aria-hidden="true">*</span></label>
+                                <label>Shipping Address <span className="required-star" aria-hidden="true">*</span></label>
                                 <input
                                     type="text"
                                     name="shippingAddress"
                                     value={formData.shippingAddress}
                                     onChange={handleInputChange}
                                     required
+                                    disabled={selectedAddressId !== 'new'}
                                 />
                             </div>
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>City <span class="required-star" aria-hidden="true">*</span></label>
+                                    <label>City <span className="required-star" aria-hidden="true">*</span></label>
                                     <input
                                         type="text"
                                         name="city"
                                         value={formData.city}
                                         onChange={handleInputChange}
                                         required
+                                        disabled={selectedAddressId !== 'new'}
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>ZIP/Postal Code <span class="required-star" aria-hidden="true">*</span></label>
+                                    <label>ZIP/Postal Code <span className="required-star" aria-hidden="true">*</span></label>
                                     <input
                                         type="text"
                                         name="zipCode"
                                         value={formData.zipCode}
                                         onChange={handleInputChange}
                                         required
+                                        disabled={selectedAddressId !== 'new'}
                                         pattern="[0-9a-zA-Z]{5,10}"
                                         title="Please enter a valid postal code (5 to 10 alphanumeric characters)"
                                     />
@@ -204,29 +335,27 @@ const Checkout = () => {
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Country <span class="required-star" aria-hidden="true">*</span></label>
+                                    <label>Country <span className="required-star" aria-hidden="true">*</span></label>
                                     <select
                                         name="country"
                                         value={formData.country}
                                         onChange={handleInputChange}
                                         required
+                                        disabled={selectedAddressId !== 'new'}
                                     >
                                         <option value="India">India</option>
                                     </select>
                                 </div>
                                 <div className="form-group">
-                                    <label>
-                                        State <span class="required-star" aria-hidden="true">*</span>
-                                    </label>
+                                    <label>State <span className="required-star" aria-hidden="true">*</span></label>
                                     <select
                                         name="state"
                                         value={formData.state}
                                         onChange={handleInputChange}
                                         required
+                                        disabled={selectedAddressId !== 'new'}
                                     >
-                                        <option value="">
-                                            Select State
-                                        </option>
+                                        <option value="">Select State</option>
                                         {regionsByCountry[formData.country].map((region) => (
                                             <option key={region} value={region}>
                                                 {region}
@@ -237,17 +366,37 @@ const Checkout = () => {
                             </div>
 
                             <div className="form-group">
-                                <label>Phone Number <span class="required-star" aria-hidden="true">*</span></label>
+                                <label>Phone Number <span className="required-star" aria-hidden="true">*</span></label>
                                 <input
                                     type="tel"
                                     name="phoneNumber"
                                     value={formData.phoneNumber}
                                     onChange={handleInputChange}
                                     required
+                                    disabled={selectedAddressId !== 'new'}
                                     pattern="[0-9]{7,15}"
                                     title="Please enter a valid phone number containing 7 to 15 digits without spaces."
                                 />
                             </div>
+
+                            {selectedAddressId === 'new' && savedAddresses.length < 3 && (
+                                <div className="checkbox-group save-address-checkbox">
+                                    <label className="checkbox-label">
+                                        <input
+                                            type="checkbox"
+                                            checked={saveNewAddress}
+                                            onChange={(e) => setSaveNewAddress(e.target.checked)}
+                                        />
+                                        <span>Save this address</span>
+                                    </label>
+                                </div>
+                            )}
+
+                            {savedAddresses.length >= 3 && (
+                                <p className="address-limit-info">
+                                    Try deleting any of the saved address to save a new address.
+                                </p>
+                            )}
 
                             <div className="shipping-method">
                                 <h3>Shipping Method</h3>
@@ -318,7 +467,7 @@ const Checkout = () => {
 
                             <div className="total-row">
                                 <span>Shipping:</span>
-                                <span>${selectedShippingFee.toFixed(2)} (Standard)</span>
+                                <span>${selectedShippingFee.toFixed(2)} ({formData.shippingMethod === 'standard' ? 'Standard' : 'Express'})</span>
                             </div>
 
                             <div className="total-row">
