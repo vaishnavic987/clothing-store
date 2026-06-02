@@ -75,4 +75,23 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 
 
-export { authUser, registerUser, logoutUser };
+// @desc  Get saved address for logged-in user
+// @route GET /api/users/address
+// @access Private
+const getAddress = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id).select("savedAddress");
+    res.json(user.savedAddress || {});
+});
+
+// @desc  Save / update address for logged-in user
+// @route PUT /api/users/address
+// @access Private
+const saveAddress = asyncHandler(async (req, res) => {
+    const { firstName, lastName, email, shippingAddress, city, state, zipCode, country, phoneNumber } = req.body;
+    await User.findByIdAndUpdate(req.user._id, {
+        savedAddress: { firstName, lastName, email, shippingAddress, city, state, zipCode, country, phoneNumber },
+    });
+    res.json({ message: "Address saved successfully" });
+});
+
+export { authUser, registerUser, logoutUser, getAddress, saveAddress };

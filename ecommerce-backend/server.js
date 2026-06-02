@@ -58,9 +58,7 @@ app.get("/api-docs.json", (req, res) => {
 
 // --- API (before production SPA) ---
 app.use("/api/products", productRoutes);
-app.get("/api/config/paypal", (req, res) => {
-  res.send(process.env.PAYPAL_CLIENT_ID);
-});
+
 
 app.use("/api/users", userRoutes);
 app.use("/api/cart", cartRoutes);

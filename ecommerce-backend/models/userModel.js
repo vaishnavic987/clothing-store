@@ -1,11 +1,24 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
+const savedAddressSchema = new mongoose.Schema({
+    firstName:       { type: String, default: '' },
+    lastName:        { type: String, default: '' },
+    email:           { type: String, default: '' },
+    shippingAddress: { type: String, default: '' },
+    city:            { type: String, default: '' },
+    state:           { type: String, default: '' },
+    zipCode:         { type: String, default: '' },
+    country:         { type: String, default: 'India' },
+    phoneNumber:     { type: String, default: '' },
+}, { _id: false });
+
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     isAdmin: { type: Boolean, required: true, default: false },
+    savedAddress: { type: savedAddressSchema, default: null },
 },{
     timestamps: true,
 });
