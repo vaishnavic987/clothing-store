@@ -26,6 +26,7 @@ const productSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
+    enum: ["mens", "womens", "kids"],
   },
   price: {
     type: Number,
@@ -63,6 +64,18 @@ const productSchema = new mongoose.Schema({
 },{
     timestamps: true,
 });
+
+// Full-text search index — weights determine field priority in relevance score
+productSchema.index(
+    { name: "text", brand: "text", description: "text", color: "text" },
+    { weights: { name: 10, brand: 5, color: 3, description: 2 } }
+);
+
+// Indexes for fast filtering and sorting
+productSchema.index({ category: 1 });
+productSchema.index({ price: 1 });
+productSchema.index({ rating: -1 });
+productSchema.index({ category: 1, price: 1 });
 
 const Product = mongoose.model("Product", productSchema);
 
