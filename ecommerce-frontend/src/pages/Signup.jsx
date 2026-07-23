@@ -33,9 +33,10 @@ const Signup = () => {
       return;
     }
 
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/; 
+    // Letters + numbers required; special characters allowed (optional)
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
     if (!passwordRegex.test(password)) {
-      setError('Password must be at least 6 characters and contain both letters and numbers.');
+      setError('Password must be at least 6 characters and contain both letters and numbers. Special characters are optional.');
       return;
     }
 
