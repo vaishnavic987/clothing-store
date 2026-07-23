@@ -1,7 +1,7 @@
 name: Step 4 # Build first graph
 
 # Checks Step 4: learner committed graphify-out/GRAPH_REPORT.md
-# Then posts review content and finishes the exercise.
+# Then posts Step 5 and enables the next workflow.
 
 on:
   push:
@@ -18,7 +18,7 @@ permissions:
   issues: write
 
 env:
-  REVIEW_FILE: ".github/steps/x-review.md"
+  STEP_5_FILE: ".github/steps/5-draft-tests.md"
 
 jobs:
   find_exercise:
@@ -88,8 +88,8 @@ jobs:
         if: steps.check-graph-report.outcome == 'failure'
         run: exit 1
 
-  post_review_content:
-    name: Post review content
+  post_next_step_content:
+    name: Post next step content
     needs: [find_exercise, check_step_work]
     runs-on: ubuntu-latest
     if: |
@@ -114,24 +114,27 @@ jobs:
         with:
           repository: ${{ env.ISSUE_REPOSITORY }}
           issue-number: ${{ env.ISSUE_NUMBER }}
-          file: exercise-toolkit/markdown-templates/step-feedback/lesson-review.md
+          file: exercise-toolkit/markdown-templates/step-feedback/step-finished-prepare-next-step.md
+          vars: |
+            next_step_number: 5
 
-      - name: Create comment - add review content
+      - name: Create comment - add step content
         uses: GrantBirki/comment@v2.1.1
         with:
           repository: ${{ env.ISSUE_REPOSITORY }}
           issue-number: ${{ env.ISSUE_NUMBER }}
-          file: ${{ env.REVIEW_FILE }}
+          file: ${{ env.STEP_5_FILE }}
 
-      - name: Disable current workflow
-        run: gh workflow disable "4-build-first-graph.yml"
+      - name: Create comment - watching for progress
+        uses: GrantBirki/comment@v2.1.1
+        with:
+          repository: ${{ env.ISSUE_REPOSITORY }}
+          issue-number: ${{ env.ISSUE_NUMBER }}
+          file: exercise-toolkit/markdown-templates/step-feedback/watching-for-progress.md
+
+      - name: Disable current workflow and enable next one
+        run: |
+          gh workflow disable "4-build-first-graph.yml"
+          gh workflow enable "5-draft-tests.yml"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  finish_exercise:
-    name: Finish Exercise
-    needs: [find_exercise, post_review_content]
-    uses: skills/exercise-toolkit/.github/workflows/finish-exercise.yml@v0.7.0
-    with:
-      issue-url: ${{ needs.find_exercise.outputs.issue-url }}
-      exercise-title: "Graphify Skills — Clothing Store"
