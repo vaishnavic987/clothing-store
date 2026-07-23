@@ -1,14 +1,17 @@
-name: Step 1 # Add graphifyignore
+name: Step 2 # AI assistant integration
 
-# Checks Step 1: learner committed a valid .graphifyignore
-# Then posts Step 2 on the exercise issue and enables the next workflow.
+# Checks Step 2: learner committed a Graphify integration for Cursor, Claude, and/or Copilot
+# Then posts Step 3 on the exercise issue and enables the next workflow.
 
 on:
   push:
     branches:
       - main
     paths:
-      - ".graphifyignore"
+      - ".cursor/rules/graphify.mdc"
+      - "CLAUDE.md"
+      - "AGENTS.md"
+      - ".github/copilot-instructions.md"
   workflow_dispatch:
 
 permissions:
@@ -17,7 +20,7 @@ permissions:
   issues: write
 
 env:
-  STEP_2_FILE: ".github/steps/2-install-graphify-cli.md"
+  STEP_3_FILE: ".github/steps/3-add-graphifyignore.md"
 
 jobs:
   find_exercise:
@@ -60,15 +63,26 @@ jobs:
           file: exercise-toolkit/markdown-templates/step-feedback/checking-work.md
           edit-mode: replace
 
-      - name: Check .graphifyignore exists and ignores build folders
-        id: check-graphifyignore
+      - name: Check AI assistant Graphify integration
+        id: check-assistant-integration
         continue-on-error: true
         run: |
           set -euo pipefail
-          test -f .graphifyignore
-          grep -q 'node_modules' .graphifyignore
-          grep -q 'dist' .graphifyignore
-          echo "STEP_MESSAGE=.graphifyignore includes node_modules and dist" >> "$GITHUB_OUTPUT"
+          found=""
+          if [ -f .cursor/rules/graphify.mdc ] && [ -s .cursor/rules/graphify.mdc ]; then
+            found="Cursor (.cursor/rules/graphify.mdc)"
+          elif [ -f CLAUDE.md ] && grep -qi 'graphify' CLAUDE.md; then
+            found="Claude Code (CLAUDE.md)"
+          elif [ -f AGENTS.md ] && grep -qi 'graphify' AGENTS.md; then
+            found="AGENTS.md (Copilot / Codex / multi-assistant)"
+          elif [ -f .github/copilot-instructions.md ] && grep -qi 'graphify' .github/copilot-instructions.md; then
+            found="GitHub Copilot (.github/copilot-instructions.md)"
+          fi
+          if [ -z "$found" ]; then
+            echo "No Graphify assistant integration file found"
+            exit 1
+          fi
+          echo "STEP_MESSAGE=${found}" >> "$GITHUB_OUTPUT"
 
       - name: Update comment - step results
         uses: GrantBirki/comment@v2.1.1
@@ -79,13 +93,13 @@ jobs:
           file: exercise-toolkit/markdown-templates/step-feedback/step-results-table.md
           edit-mode: replace
           vars: |
-            step_number: 1
+            step_number: 2
             results_table:
-              - description: ${{ steps.check-graphifyignore.outputs.STEP_MESSAGE || '.graphifyignore is valid' }}
-                passed: ${{ steps.check-graphifyignore.outcome == 'success' }}
+              - description: ${{ steps.check-assistant-integration.outputs.STEP_MESSAGE || 'AI assistant Graphify integration exists' }}
+                passed: ${{ steps.check-assistant-integration.outcome == 'success' }}
 
       - name: Fail job if checks failed
-        if: steps.check-graphifyignore.outcome == 'failure'
+        if: steps.check-assistant-integration.outcome == 'failure'
         run: exit 1
 
   post_next_step_content:
@@ -114,14 +128,14 @@ jobs:
           issue-number: ${{ env.ISSUE_NUMBER }}
           file: exercise-toolkit/markdown-templates/step-feedback/step-finished-prepare-next-step.md
           vars: |
-            next_step_number: 2
+            next_step_number: 3
 
       - name: Create comment - add step content
         uses: GrantBirki/comment@v2.1.1
         with:
           repository: ${{ env.ISSUE_REPOSITORY }}
           issue-number: ${{ env.ISSUE_NUMBER }}
-          file: ${{ env.STEP_2_FILE }}
+          file: ${{ env.STEP_3_FILE }}
 
       - name: Create comment - watching for progress
         uses: GrantBirki/comment@v2.1.1
@@ -132,7 +146,7 @@ jobs:
 
       - name: Disable current workflow and enable next one
         run: |
-          gh workflow disable "1-add-graphifyignore.yml"
-          gh workflow enable "2-install-graphify-cli.yml"
+          gh workflow disable "2-ai-assistant-integration.yml"
+          gh workflow enable "3-add-graphifyignore.yml"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

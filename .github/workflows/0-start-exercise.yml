@@ -12,7 +12,7 @@ permissions:
   issues: write # Create issue and comment on issues
 
 env:
-  STEP_1_FILE: ".github/steps/1-add-graphifyignore.md"
+  STEP_1_FILE: ".github/steps/1-install-graphify-cli.md"
 
 jobs:
   start_exercise:
@@ -62,6 +62,6 @@ jobs:
       - name: Disable current workflow and enable next one
         run: |
           gh workflow disable "0-start-exercise.yml"
-          gh workflow enable "1-add-graphifyignore.yml"
+          gh workflow enable "1-install-graphify-cli.yml"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

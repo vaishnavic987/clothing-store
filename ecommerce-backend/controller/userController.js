@@ -3,7 +3,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import jwt from "jsonwebtoken";
 
 const generateToken = (id) =>
-    jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+    jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "90d" });
 
 // @desc Auth user & get token
 // @route POST /api/users/login
@@ -18,7 +18,7 @@ const authUser = asyncHandler(async (req, res) => {
             secure: process.env.NODE_ENV === "production",
             sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
             path: "/",
-            maxAge: 30 * 24 * 60 * 60 * 1000,
+            maxAge: 90 * 24 * 60 * 60 * 1000,
         });
         res.json({
             success: true,

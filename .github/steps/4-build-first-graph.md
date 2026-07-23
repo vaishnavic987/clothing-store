@@ -1,8 +1,8 @@
 ## Step 4: Build your first knowledge graph
 
-_Cursor is connected — almost done!_ :sparkles:
+_`.graphifyignore` is in place — time to build a clean graph!_ :sparkles:
 
-**What is a knowledge graph?**: Graphify reads your project and writes outputs like `graphify-out/GRAPH_REPORT.md` and `graph.json` so you (and AI) can query how the clothing store code connects — cart, orders, payments, and the React storefront.
+**What is a knowledge graph?**: Graphify reads your project (skipping ignored folders) and writes outputs like `graphify-out/GRAPH_REPORT.md` and `graph.json` so you (and any AI assistant) can query how the clothing store code connects — cart, orders, payments, and the React storefront.
 
 ### :keyboard: Activity: Run Graphify and commit output
 
@@ -30,7 +30,7 @@ git push
 <details>
 <summary>Having trouble? 🤷</summary><br/>
 
-- Run from the repo root (where `package.json` is).
+- Run from the repo root (where `package.json` and `.graphifyignore` are).
 - Open `graphify-out/graph.html` in a browser to explore the graph.
 
 </details>
