@@ -1,6 +1,6 @@
-name: Step 3 # Cursor integration
+name: Step 3 # Add graphifyignore
 
-# Checks Step 3: learner committed .cursor/rules/graphify.mdc
+# Checks Step 3: learner committed a valid .graphifyignore
 # Then posts Step 4 on the exercise issue and enables the next workflow.
 
 on:
@@ -8,7 +8,7 @@ on:
     branches:
       - main
     paths:
-      - ".cursor/rules/graphify.mdc"
+      - ".graphifyignore"
   workflow_dispatch:
 
 permissions:
@@ -60,14 +60,15 @@ jobs:
           file: exercise-toolkit/markdown-templates/step-feedback/checking-work.md
           edit-mode: replace
 
-      - name: Check Cursor Graphify rule
-        id: check-cursor-rule
+      - name: Check .graphifyignore exists and ignores build folders
+        id: check-graphifyignore
         continue-on-error: true
         run: |
           set -euo pipefail
-          test -f .cursor/rules/graphify.mdc
-          test -s .cursor/rules/graphify.mdc
-          echo "STEP_MESSAGE=.cursor/rules/graphify.mdc exists" >> "$GITHUB_OUTPUT"
+          test -f .graphifyignore
+          grep -q 'node_modules' .graphifyignore
+          grep -q 'dist' .graphifyignore
+          echo "STEP_MESSAGE=.graphifyignore includes node_modules and dist" >> "$GITHUB_OUTPUT"
 
       - name: Update comment - step results
         uses: GrantBirki/comment@v2.1.1
@@ -80,11 +81,11 @@ jobs:
           vars: |
             step_number: 3
             results_table:
-              - description: ${{ steps.check-cursor-rule.outputs.STEP_MESSAGE || 'Cursor Graphify rule exists' }}
-                passed: ${{ steps.check-cursor-rule.outcome == 'success' }}
+              - description: ${{ steps.check-graphifyignore.outputs.STEP_MESSAGE || '.graphifyignore is valid' }}
+                passed: ${{ steps.check-graphifyignore.outcome == 'success' }}
 
       - name: Fail job if checks failed
-        if: steps.check-cursor-rule.outcome == 'failure'
+        if: steps.check-graphifyignore.outcome == 'failure'
         run: exit 1
 
   post_next_step_content:
@@ -131,7 +132,7 @@ jobs:
 
       - name: Disable current workflow and enable next one
         run: |
-          gh workflow disable "3-cursor-integration.yml"
+          gh workflow disable "3-add-graphifyignore.yml"
           gh workflow enable "4-build-first-graph.yml"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

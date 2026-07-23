@@ -4,19 +4,19 @@ _Learn Graphify on a real Express + React clothing store, in under an hour._
 
 ## Welcome
 
-This repository is a full-stack clothing store (`ecommerce-backend` + `ecommerce-frontend`). This GitHub Skills-style exercise walks you through setting up **Graphify** so AI assistants (like Cursor) can understand how cart, orders, and payments connect.
+This repository is a full-stack clothing store (`ecommerce-backend` + `ecommerce-frontend`). This GitHub Skills-style exercise walks you through setting up **Graphify** so AI coding assistants (**Cursor**, **Claude Code**, **GitHub Copilot**, and others) can understand how cart, orders, and payments connect.
 
 - **Who is this for**: Developers new to Graphify or GitHub Skills exercises.
-- **What you'll learn**: `.graphifyignore`, Graphify CLI, Cursor integration, and your first knowledge graph.
+- **What you'll learn**: Graphify CLI, AI assistant integration, `.graphifyignore`, and your first knowledge graph.
 - **What you'll build**: Four concrete commits that Actions can verify.
 - **Prerequisites**: A GitHub account; basic git (`add` / `commit` / `push`).
 - **How long**: About 30–45 minutes.
 
 In this exercise, you will:
 
-1. Add a `.graphifyignore`
-2. Install the Graphify CLI (and commit a proof file)
-3. Connect Graphify to Cursor
+1. Install the Graphify CLI (and commit a proof file)
+2. Connect Graphify to your AI assistant (Cursor, Claude, or Copilot)
+3. Add a `.graphifyignore` (before the first build)
 4. Build and commit your first knowledge graph
 
 ### How progress works
@@ -59,12 +59,33 @@ Also confirm on the template repo:
 | API entry | `ecommerce-backend/server.js` |
 | Cart / orders / payments | `ecommerce-backend/routes/` + `controller/` |
 | Storefront | `ecommerce-frontend/src/` |
-| Swagger | `/api-docs` when the API is running |
+| Backend how-to-run | [`ecommerce-backend/README.md`](ecommerce-backend/README.md) |
+| Swagger | http://localhost:3000/api-docs |
+
+### How to run the backend
+
+Requires Node.js 18+ and MongoDB. Env file is at the **repo root** (`.env`), not inside `ecommerce-backend/`.
 
 ```bash
+# From the repository root — create a .env file with at least:
+#   MONGO_URI=mongodb://127.0.0.1:27017/clothing-store
+#   JWT_SECRET=change-me
+#   CLIENT_URL=http://localhost:5173
+#   API_PUBLIC_URL=http://localhost:3000
+
 npm install
-npm start                          # API (nodemon)
-cd ecommerce-frontend && npm run dev
+npm start              # nodemon → http://localhost:3000
+npm run data:import    # optional: seed users + products
+```
+
+Full backend details (env table, seed, production): see **[ecommerce-backend/README.md](ecommerce-backend/README.md)**.
+
+### How to run the frontend
+
+```bash
+cd ecommerce-frontend
+npm install
+npm run dev            # Vite → http://localhost:5173
 ```
 
 ---

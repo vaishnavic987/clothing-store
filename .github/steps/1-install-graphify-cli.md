@@ -1,6 +1,8 @@
-## Step 2: Install the Graphify CLI
+## Step 1: Install the Graphify CLI
 
-_Nice work on `.graphifyignore`!_ :sparkles:
+_Welcome to "Graphify Skills — Clothing Store"!_ :wave:
+
+**What is Graphify?**: Graphify builds a knowledge graph of your project so AI coding assistants (Cursor, Claude Code, GitHub Copilot, and others) understand your code better.
 
 **What is the Graphify CLI?**: A command-line tool (`graphify`) you install once on your laptop. The package name on PyPI is `graphifyy`.
 
@@ -31,7 +33,7 @@ git commit -m "Prove Graphify CLI is installed"
 git push
 ```
 
-4. Wait about 20 seconds and watch the comments for Step 3.
+4. Wait about 20 seconds and watch the comments for Step 2.
 
 <details>
 <summary>Having trouble? 🤷</summary><br/>
